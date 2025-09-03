@@ -1,0 +1,12 @@
+name: ExpandLibreforge
+version: '1.0.0'
+main: com.github.gaboss44.expandlibreforge.ExpandLibreforgePlugin
+api-version: '1.18'
+prefix: ExpandLibreforge
+load: STARTUP
+authors: [ gaboss44 ]
+description: More effects, filters and conditions for Libreforge
+depend:
+  - eco
+softdepend:
+  - libreforge
