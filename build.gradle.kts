@@ -19,14 +19,16 @@ repositories {
     }
     maven("https://oss.sonatype.org/content/groups/public/")
     maven("https://repo.auxilor.io/repository/maven-public/")
+    maven("https://repo.codemc.org/repository/maven-public/")
     maven("https://jitpack.io")
 }
 
 dependencies {
-    compileOnly("org.spigotmc:spigot-api:1.18.2-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT")
     compileOnly("com.willfp:eco:6.76.3")
     compileOnly("org.jetbrains:annotations:23.0.0")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
+    compileOnly("de.tr7zw:item-nbt-api:2.12.3")
 }
 
 apply(plugin = "java")

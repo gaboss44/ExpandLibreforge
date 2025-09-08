@@ -1,0 +1,6 @@
+environment:
+  - name: libreforge version
+    value: 4.77.0
+
+options:
+  color: "&#DD55DA"

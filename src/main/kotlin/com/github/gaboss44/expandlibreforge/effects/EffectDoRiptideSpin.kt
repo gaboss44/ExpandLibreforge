@@ -1,6 +1,5 @@
 package com.github.gaboss44.expandlibreforge.effects
 
-import com.github.gaboss44.expandlibreforge.utils.StartRiptideAttackMethod
 import com.willfp.eco.core.config.interfaces.Config
 import com.willfp.libreforge.NoCompileData
 import com.willfp.libreforge.arguments
@@ -29,6 +28,7 @@ object EffectDoRiptideSpin : Effect<NoCompileData>("do_riptide_spin") {
         val strength = config.getDoubleFromExpression("strength", data)
         if (strength <= 0) return false
 
-        return StartRiptideAttackMethod.invoke(player, duration, strength.toFloat())
+        player.startRiptideAttack(duration, strength.toFloat(), null)
+        return true
     }
 }
