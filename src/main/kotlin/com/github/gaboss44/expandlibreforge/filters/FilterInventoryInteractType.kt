@@ -1,6 +1,7 @@
 package com.github.gaboss44.expandlibreforge.filters
 
 import com.willfp.eco.core.config.interfaces.Config
+import com.willfp.libreforge.NoCompileData
 import com.willfp.libreforge.ViolationContext
 import com.willfp.libreforge.filters.Filter
 import com.willfp.libreforge.triggers.TriggerData
@@ -9,15 +10,7 @@ import org.bukkit.event.inventory.InventoryDragEvent
 import org.bukkit.event.inventory.InventoryInteractEvent
 import org.bukkit.event.inventory.TradeSelectEvent
 
-object FilterInventoryInteractType : Filter<Collection<String>, Collection<String>>("inventory_interact_type") {
-
-    override fun makeCompileData(
-        config: Config,
-        context: ViolationContext,
-        values: Collection<String>
-    ): Collection<String> {
-        return values
-    }
+object FilterInventoryInteractType : Filter<NoCompileData, Collection<String>>("inventory_interact_type") {
 
     override fun getValue(
         config: Config,
@@ -30,11 +23,11 @@ object FilterInventoryInteractType : Filter<Collection<String>, Collection<Strin
     override fun isMet(
         data: TriggerData,
         value: Collection<String>,
-        compileData: Collection<String>
+        compileData: NoCompileData
     ): Boolean {
         val event = data.event as? InventoryInteractEvent ?: return false
         val type = Values.getFromEvent(event) ?: return false
-        return compileData.contains(type.lowerValue)
+        return value.contains(type.lowerValue)
     }
 
     enum class Values(val lowerValue : String) {

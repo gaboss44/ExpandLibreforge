@@ -7,7 +7,7 @@ import com.willfp.libreforge.triggers.TriggerParameter
 import org.bukkit.event.EventHandler
 import org.bukkit.event.player.PlayerRiptideEvent
 
-object TriggerPlayerRiptide : Trigger("player_riptide") {
+object TriggerRiptide : Trigger("riptide") {
     override val parameters = setOf(
         TriggerParameter.PLAYER,
         TriggerParameter.EVENT,

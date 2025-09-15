@@ -7,7 +7,7 @@ import com.willfp.libreforge.triggers.TriggerParameter
 import org.bukkit.event.EventHandler
 import org.bukkit.event.player.PlayerInteractEvent
 
-object TriggerPlayerInteract : Trigger("player_interact") {
+object TriggerInteract : Trigger("interact") {
     override val parameters = setOf(
         TriggerParameter.PLAYER,
         TriggerParameter.EVENT,

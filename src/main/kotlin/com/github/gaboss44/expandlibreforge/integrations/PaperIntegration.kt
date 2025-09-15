@@ -1,8 +1,7 @@
 package com.github.gaboss44.expandlibreforge.integrations
 
-import com.github.gaboss44.expandlibreforge.effects.EffectDoRiptideSpin
-import com.github.gaboss44.expandlibreforge.filters.FilterBeaconEffect
-import com.github.gaboss44.expandlibreforge.filters.FilterCritical
+import com.github.gaboss44.expandlibreforge.effects.*
+import com.github.gaboss44.expandlibreforge.filters.*
 import com.github.gaboss44.expandlibreforge.util.MethodUtils
 import com.willfp.eco.core.EcoPlugin
 import com.willfp.libreforge.effects.Effects
@@ -22,7 +21,21 @@ object PaperIntegration : LoadableIntegration {
             )) {
             Effects.register(EffectDoRiptideSpin)
         }
+
+        Effects.register(EffectSetReviveHealth)
+
+        Filters.register(FilterReviveHealth.AtLeast)
+        Filters.register(FilterReviveHealth.AtMost)
+        Filters.register(FilterReviveHealth.Equals)
+        Filters.register(FilterReviveHealth.GreaterThan)
+        Filters.register(FilterReviveHealth.LowerThan)
+
+        Filters.register(FilterDeathSound)
+        Filters.register(FilterHasDeathSound)
+        Effects.register(EffectSetDeathSound)
+
         Filters.register(FilterBeaconEffect)
+
         Filters.register(FilterCritical)
     }
 

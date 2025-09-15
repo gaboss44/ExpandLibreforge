@@ -10,7 +10,7 @@ object FilterPlayerIsInvulnerable : Filter<NoCompileData,Boolean>("player_is_inv
         config: Config,
         data: TriggerData?,
         key: String
-    ) = config.getBoolOrNull(key) ?: true
+    ) = config.getBool(key)
 
     override fun isMet(data: TriggerData, value: Boolean, compileData: NoCompileData): Boolean {
         val player = data.player ?: return false

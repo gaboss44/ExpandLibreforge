@@ -10,10 +10,10 @@ object FilterPlayerHasGravity : Filter<NoCompileData,Boolean>("player_has_gravit
         config: Config,
         data: TriggerData?,
         key: String
-    ) = config.getBoolOrNull(key) ?: true
+    ) = config.getBool(key)
 
     override fun isMet(data: TriggerData, value: Boolean, compileData: NoCompileData): Boolean {
-        val player = data.player ?: return false
+        val player = data.player ?: return true
         return player.hasGravity() == value
     }
 }
