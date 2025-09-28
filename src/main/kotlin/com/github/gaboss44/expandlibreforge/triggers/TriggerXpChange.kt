@@ -4,6 +4,7 @@ import com.willfp.libreforge.toDispatcher
 import com.willfp.libreforge.triggers.Trigger
 import com.willfp.libreforge.triggers.TriggerData
 import com.willfp.libreforge.triggers.TriggerParameter
+import com.willfp.libreforge.triggers.Triggers
 import org.bukkit.event.EventHandler
 import org.bukkit.event.player.PlayerExpChangeEvent
 
@@ -25,6 +26,16 @@ sealed class TriggerXpChange(id: String) : Trigger(id) {
                 value = value.toDouble()
             )
         )
+    }
+
+    companion object {
+        fun registerAllInto(category: Triggers) {
+            category.register(LowestPriority)
+            category.register(LowPriority)
+            category.register(NormalPriority)
+            category.register(HighPriority)
+            category.register(HighestPriority)
+        }
     }
 
     object LowestPriority : TriggerXpChange("xp_change_lowest_priority") {

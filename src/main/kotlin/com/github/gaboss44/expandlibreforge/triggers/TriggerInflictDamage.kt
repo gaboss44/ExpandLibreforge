@@ -1,5 +1,6 @@
 package com.github.gaboss44.expandlibreforge.triggers
 
+import com.github.gaboss44.expandlibreforge.features.multipliers.DamageMultipliers
 import com.github.gaboss44.expandlibreforge.util.tryDamagerAsLivingEntity
 import com.github.gaboss44.expandlibreforge.util.tryDamagerAsPlayer
 import com.github.gaboss44.expandlibreforge.util.tryDamagerAsProjectile
@@ -7,6 +8,7 @@ import com.willfp.libreforge.toDispatcher
 import com.willfp.libreforge.triggers.Trigger
 import com.willfp.libreforge.triggers.TriggerData
 import com.willfp.libreforge.triggers.TriggerParameter
+import com.willfp.libreforge.triggers.Triggers
 import com.willfp.libreforge.triggers.tryAsLivingEntity
 import io.lumine.mythic.bukkit.MythicBukkit
 import org.bukkit.Bukkit
@@ -21,7 +23,8 @@ sealed class TriggerInflictDamage(id: String) : Trigger(id) {
         TriggerParameter.VICTIM,
         TriggerParameter.PROJECTILE,
         TriggerParameter.EVENT,
-        TriggerParameter.VALUE
+        TriggerParameter.VALUE,
+        TriggerParameter.ALT_VALUE
     )
 
     fun handle(event: EntityDamageByEntityEvent) {
@@ -44,10 +47,21 @@ sealed class TriggerInflictDamage(id: String) : Trigger(id) {
                 victim = victim,
                 event = event,
                 projectile = projectile,
-                value = event.finalDamage,
+                value = event.finalDamage * DamageMultipliers.calculate(event),
                 altValue = event.damage
             )
         )
+    }
+
+    companion object {
+        fun registerAllInto(category: Triggers) {
+            category.register(HighestPriority)
+            category.register(HighPriority)
+            category.register(NormalPriority)
+            category.register(LowPriority)
+            category.register(LowestPriority)
+            category.register(Monitor)
+        }
     }
 
     object HighestPriority : TriggerInflictDamage("inflict_damage_highest_priority") {
@@ -72,6 +86,11 @@ sealed class TriggerInflictDamage(id: String) : Trigger(id) {
 
     object LowestPriority : TriggerInflictDamage("inflict_damage_lowest_priority") {
         @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+        fun onDamage(event: EntityDamageByEntityEvent) = handle(event)
+    }
+
+    object Monitor : TriggerInflictDamage("inflict_damage_monitor") {
+        @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
         fun onDamage(event: EntityDamageByEntityEvent) = handle(event)
     }
 }

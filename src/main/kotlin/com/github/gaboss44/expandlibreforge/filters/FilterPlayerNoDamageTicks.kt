@@ -3,6 +3,7 @@ package com.github.gaboss44.expandlibreforge.filters
 import com.willfp.eco.core.config.interfaces.Config
 import com.willfp.libreforge.NoCompileData
 import com.willfp.libreforge.filters.Filter
+import com.willfp.libreforge.filters.Filters
 import com.willfp.libreforge.triggers.TriggerData
 
 sealed class FilterPlayerNoDamageTicks(id: String) : Filter<NoCompileData, Int>(id) {
@@ -17,6 +18,16 @@ sealed class FilterPlayerNoDamageTicks(id: String) : Filter<NoCompileData, Int>(
     }
 
     abstract fun compare(playerValue: Int, filterValue: Int): Boolean
+
+    companion object {
+        fun registerAllInto(category: Filters) {
+            category.register(Equals)
+            category.register(AtLeast)
+            category.register(AtMost)
+            category.register(GreaterThan)
+            category.register(LowerThan)
+        }
+    }
 
     object Equals : FilterPlayerNoDamageTicks("player_no_damage_ticks_equals") {
         override fun compare(playerValue: Int, filterValue: Int): Boolean {

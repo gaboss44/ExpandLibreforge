@@ -1,11 +1,13 @@
 package com.github.gaboss44.expandlibreforge.triggers
 
+import com.github.gaboss44.expandlibreforge.features.multipliers.DamageMultipliers
 import com.github.gaboss44.expandlibreforge.util.tryDamagerAsLivingEntity
 import com.github.gaboss44.expandlibreforge.util.tryDamagerAsProjectile
 import com.willfp.libreforge.toDispatcher
 import com.willfp.libreforge.triggers.Trigger
 import com.willfp.libreforge.triggers.TriggerData
 import com.willfp.libreforge.triggers.TriggerParameter
+import com.willfp.libreforge.triggers.Triggers
 import com.willfp.libreforge.triggers.tryAsLivingEntity
 import io.lumine.mythic.bukkit.MythicBukkit
 import org.bukkit.Bukkit
@@ -21,7 +23,8 @@ sealed class TriggerTakeDamage(id: String) : Trigger(id) {
         TriggerParameter.VICTIM,
         TriggerParameter.PROJECTILE,
         TriggerParameter.EVENT,
-        TriggerParameter.VALUE
+        TriggerParameter.VALUE,
+        TriggerParameter.VELOCITY
     )
 
     fun handle(event: EntityDamageEvent) {
@@ -50,10 +53,21 @@ sealed class TriggerTakeDamage(id: String) : Trigger(id) {
                 victim = victim,
                 event = event,
                 projectile = projectile,
-                value = event.finalDamage,
+                value = event.finalDamage * DamageMultipliers.calculate(event),
                 altValue = event.damage
             )
         )
+    }
+
+    companion object {
+        fun registerAllInto(category: Triggers) {
+            category.register(HighestPriority)
+            category.register(HighPriority)
+            category.register(NormalPriority)
+            category.register(LowPriority)
+            category.register(LowestPriority)
+            category.register(Monitor)
+        }
     }
 
     object HighestPriority : TriggerTakeDamage("take_damage_highest_priority") {
@@ -78,6 +92,11 @@ sealed class TriggerTakeDamage(id: String) : Trigger(id) {
 
     object LowestPriority : TriggerTakeDamage("take_damage_lowest_priority") {
         @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+        fun onDamage(event: EntityDamageEvent) = handle(event)
+    }
+
+    object Monitor : TriggerTakeDamage("take_damage_monitor") {
+        @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
         fun onDamage(event: EntityDamageEvent) = handle(event)
     }
 }

@@ -1,5 +1,6 @@
 package com.github.gaboss44.expandlibreforge.effects
 
+import com.github.gaboss44.expandlibreforge.util.EntityTarget
 import com.willfp.eco.core.config.interfaces.Config
 import com.willfp.libreforge.NoCompileData
 import com.willfp.libreforge.arguments
@@ -15,7 +16,7 @@ object EffectSetGravity : Effect<NoCompileData>("set_gravity") {
     }
 
     override fun onTrigger(config: Config, data: TriggerData, compileData: NoCompileData): Boolean {
-        val target = Target[config.getString("target")] ?: Target.PLAYER
+        val target = EntityTarget[config.getString("target")] ?: EntityTarget.PLAYER
         val entity = target.getEntity(data) ?: return false
         val value = config.getBoolOrNull("value") ?: true
         entity.setGravity(value)

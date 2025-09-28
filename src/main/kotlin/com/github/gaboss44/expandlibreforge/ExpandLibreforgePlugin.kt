@@ -1,16 +1,26 @@
 package com.github.gaboss44.expandlibreforge
 
+import com.github.gaboss44.expandlibreforge.conditions.ConditionHasCombo
+import com.github.gaboss44.expandlibreforge.conditions.ConditionPlayerCurrentInput
 import com.github.gaboss44.expandlibreforge.effects.*
 import com.github.gaboss44.expandlibreforge.filters.*
 import com.github.gaboss44.expandlibreforge.triggers.*
 import com.github.gaboss44.expandlibreforge.mutators.*
 import com.github.gaboss44.expandlibreforge.integrations.*
+import com.github.gaboss44.expandlibreforge.listeners.DamageListener
+import com.github.gaboss44.expandlibreforge.listeners.PlayerInputListener
+import com.github.gaboss44.expandlibreforge.listeners.PlayerJoinListener
+import com.github.gaboss44.expandlibreforge.listeners.PlayerQuitListener
+import com.github.gaboss44.expandlibreforge.listeners.ServerTickListener
 import com.willfp.eco.core.Prerequisite
+import com.willfp.eco.util.ClassUtils
+import com.willfp.libreforge.conditions.Conditions
 import com.willfp.libreforge.effects.Effects
 import com.willfp.libreforge.filters.Filters
 import com.willfp.libreforge.loader.LibreforgePlugin
 import com.willfp.libreforge.mutators.Mutators
 import com.willfp.libreforge.triggers.Triggers
+import org.bukkit.event.Listener
 
 class ExpandLibreforgePlugin : LibreforgePlugin() {
 
@@ -25,35 +35,46 @@ class ExpandLibreforgePlugin : LibreforgePlugin() {
         Effects.register(EffectSetGravity)
         Effects.register(EffectSetSilent)
 
+        Effects.register(EffectSetNoDamageTicks)
+
         Effects.register(EffectAntigravity)
         Effects.register(EffectInvulnerability)
         Effects.register(EffectSilence)
 
         Effects.register(EffectSetXpChange)
 
+        Effects.register(EffectMultiplyProjectileVelocity)
+
+        Effects.register(EffectStartCombo)
+        Effects.register(EffectEndCombo)
+        Effects.register(EffectExtendCombo)
+        Effects.register(EffectStartOrExtendCombo)
+
+        Effects.register(EffectSetComboRenewalTicks)
+        Effects.register(EffectSetComboUpdateTicks)
+        Effects.register(EffectSetComboStartTicks)
+
+        Effects.register(EffectSetDamageModifier)
+
+        Effects.register(EffectPutDamageMultiplier)
+
         Triggers.register(TriggerRiptide)
-        Triggers.register(TriggerInteract)
+        Triggers.register(TriggerInteract(this))
         Triggers.register(TriggerInventoryInteract)
         Triggers.register(TriggerInventoryClick)
         Triggers.register(TriggerMineBlockStop)
 
-        Triggers.register(TriggerXpChange.LowestPriority)
-        Triggers.register(TriggerXpChange.LowPriority)
-        Triggers.register(TriggerXpChange.NormalPriority)
-        Triggers.register(TriggerXpChange.HighPriority)
-        Triggers.register(TriggerXpChange.HighestPriority)
+        TriggerXpChange.registerAllInto(Triggers)
 
-        Triggers.register(TriggerTakeDamage.HighestPriority)
-        Triggers.register(TriggerTakeDamage.HighPriority)
-        Triggers.register(TriggerTakeDamage.NormalPriority)
-        Triggers.register(TriggerTakeDamage.LowPriority)
-        Triggers.register(TriggerTakeDamage.LowestPriority)
+        TriggerTakeDamage.registerAllInto(Triggers)
 
-        Triggers.register(TriggerInflictDamage.HighestPriority)
-        Triggers.register(TriggerInflictDamage.HighPriority)
-        Triggers.register(TriggerInflictDamage.NormalPriority)
-        Triggers.register(TriggerInflictDamage.LowPriority)
-        Triggers.register(TriggerInflictDamage.LowestPriority)
+        TriggerInflictDamage.registerAllInto(Triggers)
+
+        TriggerComboStart.registerAllInto(Triggers)
+        TriggerComboEnd.registerAllInto(Triggers)
+        TriggerComboTick.registerAllInto(Triggers)
+
+        Triggers.register(TriggerToggleShield)
 
         Mutators.register(MutatorAttackDamageAsValue)
         Mutators.register(MutatorAttackDamageAsAltValue)
@@ -63,6 +84,8 @@ class ExpandLibreforgePlugin : LibreforgePlugin() {
 
         Mutators.register(MutatorXpChangeAsValue)
         Mutators.register(MutatorXpChangeAsAltValue)
+
+        Conditions.register(ConditionHasCombo)
 
         Filters.register(FilterInventoryAction)
         Filters.register(FilterInventoryDragType)
@@ -75,7 +98,13 @@ class ExpandLibreforgePlugin : LibreforgePlugin() {
         Filters.register(FilterPlayerIsInvulnerable)
         Filters.register(FilterPlayerHasGravity)
 
+        Filters.register(FilterIsSprinting)
+        Filters.register(FilterIsSneaking)
+        Filters.register(FilterIsBlocking)
+
         Filters.register(FilterVictimIsPresent)
+        Filters.register(FilterMatchEntitiesIfPresent)
+        Filters.register(FilterIgnoreEntitiesIfPresent)
 
         Filters.register(FilterProjectileIsPresent)
         Filters.register(FilterMatchProjectilesIfPresent)
@@ -83,48 +112,56 @@ class ExpandLibreforgePlugin : LibreforgePlugin() {
 
         Filters.register(FilterDamagerIsPresent)
 
-        Filters.register(FilterTradeSelectIndex.AtLeast)
-        Filters.register(FilterTradeSelectIndex.AtMost)
-        Filters.register(FilterTradeSelectIndex.Equals)
-        Filters.register(FilterTradeSelectIndex.GreaterThan)
-        Filters.register(FilterTradeSelectIndex.LowerThan)
+        FilterTradeSelectIndex.registerAllInto(Filters)
 
-        Filters.register(FilterPlayerNoDamageTicks.AtLeast)
-        Filters.register(FilterPlayerNoDamageTicks.AtMost)
-        Filters.register(FilterPlayerNoDamageTicks.Equals)
-        Filters.register(FilterPlayerNoDamageTicks.GreaterThan)
-        Filters.register(FilterPlayerNoDamageTicks.LowerThan)
+        FilterPlayerNoDamageTicks.registerAllInto(Filters)
 
-        Filters.register(FilterXpChange.AtLeast)
-        Filters.register(FilterXpChange.AtMost)
-        Filters.register(FilterXpChange.Equals)
-        Filters.register(FilterXpChange.GreaterThan)
-        Filters.register(FilterXpChange.LowerThan)
+        FilterVictimNoDamageTicks.registerAllInto(Filters)
 
-        Filters.register(FilterXpOrbCount.AtLeast)
-        Filters.register(FilterXpOrbCount.AtMost)
-        Filters.register(FilterXpOrbCount.Equals)
-        Filters.register(FilterXpOrbCount.GreaterThan)
-        Filters.register(FilterXpOrbCount.LowerThan)
+        FilterXpChange.registerAllInto(Filters)
 
-        Filters.register(FilterXpOrbExperience.AtLeast)
-        Filters.register(FilterXpOrbExperience.AtMost)
-        Filters.register(FilterXpOrbExperience.Equals)
-        Filters.register(FilterXpOrbExperience.GreaterThan)
-        Filters.register(FilterXpOrbExperience.LowerThan)
+        FilterXpOrbCount.registerAllInto(Filters)
+
+        FilterXpOrbExperience.registerAllInto(Filters)
 
         Filters.register(FilterXpOrbSpawnReason)
         Filters.register(FilterXpOrbNotSpawnReason)
 
-        if (Prerequisite.HAS_1_20_5.isMet) {
+        Filters.register(FilterHasAnyCombo)
+        Filters.register(FilterMatchComboIfAny)
+        Filters.register(FilterIgnoreComboIfAny)
 
+        if (Prerequisite.HAS_1_20_5.isMet) {
             Filters.register(FilterDamageType)
             Filters.register(FilterDamageSourceIsIndirect)
-
         }
 
         if (Prerequisite.HAS_PAPER.isMet) {
             PaperIntegration.load(this)
         }
+
+        if (ClassUtils.exists("org.bukkit.Input")) {
+            Effects.register(EffectSetPlayerInputShouldUpdateEffects)
+
+            Triggers.register(TriggerPlayerInput)
+
+            FilterPlayerInput.registerAllInto(Filters)
+
+            Conditions.register(ConditionPlayerCurrentInput)
+        }
+    }
+
+    override fun loadListeners(): List<Listener> {
+        val listeners = mutableListOf<Listener>()
+        if (Prerequisite.HAS_PAPER.isMet) {
+            listeners.add(ServerTickListener)
+        }
+        if (ClassUtils.exists("org.bukkit.Input")) {
+            listeners.add(PlayerInputListener)
+        }
+        listeners.add(DamageListener)
+        listeners.add(PlayerJoinListener)
+        listeners.add(PlayerQuitListener)
+        return listeners.toList()
     }
 }

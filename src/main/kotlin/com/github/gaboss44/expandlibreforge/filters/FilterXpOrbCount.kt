@@ -3,6 +3,7 @@ package com.github.gaboss44.expandlibreforge.filters
 import com.github.gaboss44.expandlibreforge.util.XpOrbFilter
 import com.willfp.eco.core.config.interfaces.Config
 import com.willfp.libreforge.NoCompileData
+import com.willfp.libreforge.filters.Filters
 import com.willfp.libreforge.triggers.TriggerData
 import org.bukkit.entity.ExperienceOrb
 
@@ -16,6 +17,16 @@ sealed class FilterXpOrbCount(id: String) : XpOrbFilter<NoCompileData, Int>(id) 
     }
 
     abstract fun compare(xpCount: Int, value: Int): Boolean
+
+    companion object {
+        fun registerAllInto(category: Filters) {
+            category.register(Equals)
+            category.register(AtLeast)
+            category.register(AtMost)
+            category.register(GreaterThan)
+            category.register(LowerThan)
+        }
+    }
 
     object Equals : FilterXpOrbCount("xp_orb_count_equals") {
         override fun compare(xpCount: Int, value: Int): Boolean {

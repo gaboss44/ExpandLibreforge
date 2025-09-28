@@ -3,6 +3,7 @@ package com.github.gaboss44.expandlibreforge.filters
 import com.willfp.eco.core.config.interfaces.Config
 import com.willfp.libreforge.NoCompileData
 import com.willfp.libreforge.filters.Filter
+import com.willfp.libreforge.filters.Filters
 import com.willfp.libreforge.triggers.TriggerData
 import org.bukkit.event.inventory.TradeSelectEvent
 
@@ -18,6 +19,16 @@ sealed class FilterTradeSelectIndex(id: String) : Filter<NoCompileData, Int>(id)
     }
 
     abstract fun compare(eventIndex: Int, filterIndex: Int): Boolean
+
+    companion object {
+        fun registerAllInto(category: Filters) {
+            category.register(Equals)
+            category.register(AtLeast)
+            category.register(AtMost)
+            category.register(GreaterThan)
+            category.register(LowerThan)
+        }
+    }
 
     object Equals : FilterTradeSelectIndex("trade_select_index_equals") {
         override fun compare(eventIndex: Int, filterIndex: Int): Boolean {

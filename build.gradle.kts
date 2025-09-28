@@ -4,7 +4,7 @@ plugins {
     java
     `java-library`
     kotlin("jvm") version "2.1.21"
-    id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("com.gradleup.shadow") version "8.3.6"
     id("com.willfp.libreforge-gradle-plugin") version "1.0.3"
 }
 
@@ -14,24 +14,22 @@ version = findProperty("version")!!
 repositories {
     mavenLocal()
     mavenCentral()
-    maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/") {
-        name = "spigotmc-repo"
-    }
-    maven("https://oss.sonatype.org/content/groups/public/")
     maven("https://repo.auxilor.io/repository/maven-public/")
     maven("https://repo.codemc.org/repository/maven-public/")
     maven("https://jitpack.io")
     maven("https://mvn.lumine.io/repository/maven-public/")
+    maven ("https://repo.papermc.io/repository/maven-public/")
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
     compileOnly("com.willfp:eco:6.76.3")
     compileOnly("org.jetbrains:annotations:23.0.0")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
     compileOnly("de.tr7zw:item-nbt-api:2.12.3")
     compileOnly("io.lumine:Mythic:5.7.0")
     compileOnly("io.lumine:LumineUtils:1.19-SNAPSHOT")
+    compileOnly("net.dmulloy2:ProtocolLib:5.4.0")
 }
 
 apply(plugin = "java")
@@ -40,7 +38,7 @@ apply(plugin = "com.github.johnrengelman.shadow")
 
 java {
     withSourcesJar()
-    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 }
 
 val libreforgeVersion = findProperty("libreforge-version")!!
@@ -53,7 +51,7 @@ tasks {
 
     compileKotlin {
         compilerOptions {
-            jvmTarget = JvmTarget.JVM_17
+            jvmTarget = JvmTarget.JVM_21
         }
     }
 

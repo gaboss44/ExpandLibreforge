@@ -2,11 +2,20 @@ package com.github.gaboss44.expandlibreforge.integrations
 
 import com.github.gaboss44.expandlibreforge.effects.*
 import com.github.gaboss44.expandlibreforge.filters.*
+import com.github.gaboss44.expandlibreforge.triggers.TriggerBlockingCheck
+import com.github.gaboss44.expandlibreforge.triggers.TriggerDisableShield
+import com.github.gaboss44.expandlibreforge.triggers.TriggerInflictKnockback
+import com.github.gaboss44.expandlibreforge.triggers.TriggerServerTickEnd
+import com.github.gaboss44.expandlibreforge.triggers.TriggerServerTickStart
+import com.github.gaboss44.expandlibreforge.triggers.TriggerShieldDisable
+import com.github.gaboss44.expandlibreforge.triggers.TriggerTakeKnockback
 import com.github.gaboss44.expandlibreforge.util.MethodUtils
 import com.willfp.eco.core.EcoPlugin
+import com.willfp.eco.util.ClassUtils
 import com.willfp.libreforge.effects.Effects
 import com.willfp.libreforge.filters.Filters
 import com.willfp.libreforge.integrations.LoadableIntegration
+import com.willfp.libreforge.triggers.Triggers
 import org.bukkit.entity.HumanEntity
 import org.bukkit.inventory.ItemStack
 
@@ -24,11 +33,29 @@ object PaperIntegration : LoadableIntegration {
 
         Effects.register(EffectSetReviveHealth)
 
-        Filters.register(FilterReviveHealth.AtLeast)
-        Filters.register(FilterReviveHealth.AtMost)
-        Filters.register(FilterReviveHealth.Equals)
-        Filters.register(FilterReviveHealth.GreaterThan)
-        Filters.register(FilterReviveHealth.LowerThan)
+        Effects.register(EffectSetShieldDisableCooldown)
+
+        TriggerShieldDisable.registerAllInto(Triggers)
+        TriggerDisableShield.registerAllInto(Triggers)
+
+        if (ClassUtils.exists("io.papermc.paper.event.entity.EntityKnockbackEvent")) {
+            TriggerTakeKnockback.registerAllInto(Triggers)
+            TriggerInflictKnockback.registerAllInto(Triggers)
+
+            Effects.register(EffectSetKnockback)
+
+            Filters.register(FilterKnockerIsPresent)
+        }
+
+        if (ClassUtils.exists("io.papermc.paper.event.entity.EntityBlockingDelayCheckEvent")) {
+            Triggers.register(TriggerBlockingCheck)
+            Effects.register(EffectSetBlockingDelay)
+        }
+
+        Triggers.register(TriggerServerTickStart)
+        Triggers.register(TriggerServerTickEnd)
+
+        FilterReviveHealth.registerAllInto(Filters)
 
         Filters.register(FilterDeathSound)
         Filters.register(FilterHasDeathSound)

@@ -3,6 +3,7 @@ package com.github.gaboss44.expandlibreforge.filters
 import com.willfp.eco.core.config.interfaces.Config
 import com.willfp.libreforge.NoCompileData
 import com.willfp.libreforge.filters.Filter
+import com.willfp.libreforge.filters.Filters
 import com.willfp.libreforge.triggers.TriggerData
 import org.bukkit.event.entity.EntityDeathEvent
 
@@ -18,6 +19,16 @@ sealed class FilterReviveHealth(id: String) : Filter<NoCompileData, Double>(id) 
     }
 
     abstract fun compare(reviveHealth: Double, value: Double): Boolean
+
+    companion object {
+        fun registerAllInto(category: Filters) {
+            category.register(Equals)
+            category.register(AtLeast)
+            category.register(AtMost)
+            category.register(GreaterThan)
+            category.register(LowerThan)
+        }
+    }
 
     object Equals : FilterReviveHealth("revive_health_equals") {
         override fun compare(reviveHealth: Double, value: Double): Boolean {

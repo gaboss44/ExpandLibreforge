@@ -1,9 +1,11 @@
 package com.github.gaboss44.expandlibreforge.effects
 
+import com.github.gaboss44.expandlibreforge.util.EntityTarget
 import com.willfp.eco.core.config.interfaces.Config
 import com.willfp.libreforge.NoCompileData
 import com.willfp.libreforge.arguments
 import com.willfp.libreforge.effects.Effect
+import com.willfp.libreforge.getDoubleFromExpression
 import com.willfp.libreforge.triggers.TriggerData
 import org.bukkit.entity.LivingEntity
 
@@ -16,10 +18,16 @@ object EffectSetNoDamageTicks : Effect<NoCompileData>("set_no_damage_ticks") {
     }
 
     override fun onTrigger(config: Config, data: TriggerData, compileData: NoCompileData): Boolean {
-        val target = Target[config.getString("target")] ?: Target.PLAYER
+        val target = EntityTarget[config.getString("target")] ?: EntityTarget.PLAYER
         val entity = target.getEntity(data) as? LivingEntity ?: return false
-        val value = config.getIntFromExpression("value")
-        entity.noDamageTicks = value
+        val value = config.getDoubleFromExpression("value", data)
+        val percentually = config.getBool("percentually")
+        if (percentually) {
+            entity.noDamageTicks = (value * entity.maximumNoDamageTicks / 100).toInt()
+        }
+        else {
+            entity.noDamageTicks = value.toInt()
+        }
         return true
     }
 }
