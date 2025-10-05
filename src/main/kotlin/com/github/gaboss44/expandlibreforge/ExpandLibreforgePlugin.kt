@@ -147,6 +147,11 @@ class ExpandLibreforgePlugin : LibreforgePlugin() {
         FilterComboScore.registerAllInto(Filters)
         FilterComboRemainingTicks.registerAllInto(Filters)
 
+        FilterPlayerAttackCooldown.registerAllInto(Filters)
+        FilterVictimAttackCooldown.registerAllInto(Filters)
+
+        Filters.register(FilterVictimIsHumanEntity)
+
         if (Prerequisite.HAS_1_20_5.isMet) {
             Filters.register(FilterDamageType)
             Filters.register(FilterDamageSourceIsIndirect)
