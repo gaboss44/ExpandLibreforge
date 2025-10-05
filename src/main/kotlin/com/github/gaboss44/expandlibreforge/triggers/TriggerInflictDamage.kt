@@ -10,7 +10,7 @@ import com.willfp.libreforge.triggers.TriggerData
 import com.willfp.libreforge.triggers.TriggerParameter
 import com.willfp.libreforge.triggers.Triggers
 import com.willfp.libreforge.triggers.tryAsLivingEntity
-import io.lumine.mythic.bukkit.MythicBukkit
+//import io.lumine.mythic.bukkit.MythicBukkit
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -30,12 +30,12 @@ sealed class TriggerInflictDamage(id: String) : Trigger(id) {
     fun handle(event: EntityDamageByEntityEvent) {
         val player = event.tryDamagerAsLivingEntity() ?: return
 
-        if (Bukkit.getPluginManager().isPluginEnabled("MythicMobs")) {
-            val victim = event.entity.tryAsLivingEntity()
-            if (MythicBukkit.inst().mobManager.isMythicMob(victim)) {
-                return
-            }
-        }
+//        if (Bukkit.getPluginManager().isPluginEnabled("MythicMobs")) {
+//            val victim = event.entity.tryAsLivingEntity()
+//            if (MythicBukkit.inst().mobManager.isMythicMob(victim)) {
+//                return
+//            }
+//        }
 
         val victim = event.entity.tryAsLivingEntity()
         val projectile = event.tryDamagerAsProjectile()

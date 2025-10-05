@@ -9,7 +9,7 @@ import com.willfp.libreforge.triggers.TriggerData
 import com.willfp.libreforge.triggers.TriggerParameter
 import com.willfp.libreforge.triggers.Triggers
 import com.willfp.libreforge.triggers.tryAsLivingEntity
-import io.lumine.mythic.bukkit.MythicBukkit
+//import io.lumine.mythic.bukkit.MythicBukkit
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -31,14 +31,14 @@ sealed class TriggerTakeDamage(id: String) : Trigger(id) {
 
         val entity = event.entity
 
-        if (Bukkit.getPluginManager().isPluginEnabled("MythicMobs")) {
-            if (event is EntityDamageByEntityEvent) {
-                val attacker = event.damager.tryAsLivingEntity()
-                if (MythicBukkit.inst().mobManager.isMythicMob(attacker)) {
-                    return
-                }
-            }
-        }
+//        if (Bukkit.getPluginManager().isPluginEnabled("MythicMobs")) {
+//            if (event is EntityDamageByEntityEvent) {
+//                val attacker = event.damager.tryAsLivingEntity()
+//                if (MythicBukkit.inst().mobManager.isMythicMob(attacker)) {
+//                    return
+//                }
+//            }
+//        }
 
         val byEntityEvent = event as? EntityDamageByEntityEvent
 

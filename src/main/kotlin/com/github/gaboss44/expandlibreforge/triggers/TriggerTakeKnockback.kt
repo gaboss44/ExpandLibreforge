@@ -9,7 +9,7 @@ import com.willfp.libreforge.triggers.TriggerData
 import com.willfp.libreforge.triggers.TriggerParameter
 import com.willfp.libreforge.triggers.Triggers
 import com.willfp.libreforge.triggers.tryAsLivingEntity
-import io.lumine.mythic.bukkit.MythicBukkit
+//import io.lumine.mythic.bukkit.MythicBukkit
 import io.papermc.paper.event.entity.EntityKnockbackEvent
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
@@ -30,14 +30,14 @@ sealed class TriggerTakeKnockback(id: String) : Trigger(id) {
 
         val entity = event.entity
 
-        if (Bukkit.getPluginManager().isPluginEnabled("MythicMobs")) {
-            if (event is EntityKnockbackByEntityEvent) {
-                val attacker = event.hitBy.tryAsLivingEntity()
-                if (MythicBukkit.inst().mobManager.isMythicMob(attacker)) {
-                    return
-                }
-            }
-        }
+//        if (Bukkit.getPluginManager().isPluginEnabled("MythicMobs")) {
+//            if (event is EntityKnockbackByEntityEvent) {
+//                val attacker = event.hitBy.tryAsLivingEntity()
+//                if (MythicBukkit.inst().mobManager.isMythicMob(attacker)) {
+//                    return
+//                }
+//            }
+//        }
 
         val byEntityEvent = event as? EntityKnockbackByEntityEvent
 

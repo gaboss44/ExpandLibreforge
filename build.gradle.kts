@@ -17,7 +17,7 @@ repositories {
     maven("https://repo.auxilor.io/repository/maven-public/")
     maven("https://repo.codemc.org/repository/maven-public/")
     maven("https://jitpack.io")
-    maven("https://mvn.lumine.io/repository/maven-public/")
+//    maven("https://mvn.lumine.io/repository/maven-public/")
     maven ("https://repo.papermc.io/repository/maven-public/")
 }
 
@@ -27,8 +27,8 @@ dependencies {
     compileOnly("org.jetbrains:annotations:23.0.0")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
     compileOnly("de.tr7zw:item-nbt-api:2.12.3")
-    compileOnly("io.lumine:Mythic:5.7.0")
-    compileOnly("io.lumine:LumineUtils:1.19-SNAPSHOT")
+//    compileOnly("io.lumine:Mythic:5.7.0")
+//    compileOnly("io.lumine:LumineUtils:1.19-SNAPSHOT")
     compileOnly("net.dmulloy2:ProtocolLib:5.4.0")
 }
 
