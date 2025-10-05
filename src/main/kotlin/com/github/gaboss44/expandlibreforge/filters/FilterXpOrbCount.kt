@@ -4,12 +4,13 @@ import com.github.gaboss44.expandlibreforge.util.XpOrbFilter
 import com.willfp.eco.core.config.interfaces.Config
 import com.willfp.libreforge.NoCompileData
 import com.willfp.libreforge.filters.Filters
+import com.willfp.libreforge.getIntFromExpression
 import com.willfp.libreforge.triggers.TriggerData
 import org.bukkit.entity.ExperienceOrb
 
 sealed class FilterXpOrbCount(id: String) : XpOrbFilter<NoCompileData, Int>(id) {
     override fun getValue(config: Config, data: TriggerData?, key: String): Int {
-        return config.getIntFromExpression(key)
+        return config.getIntFromExpression(key, data)
     }
 
     override fun isMet(data: TriggerData, value: Int, compileData: NoCompileData, orb: ExperienceOrb): Boolean {

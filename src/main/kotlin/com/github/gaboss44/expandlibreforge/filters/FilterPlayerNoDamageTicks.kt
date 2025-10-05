@@ -4,12 +4,13 @@ import com.willfp.eco.core.config.interfaces.Config
 import com.willfp.libreforge.NoCompileData
 import com.willfp.libreforge.filters.Filter
 import com.willfp.libreforge.filters.Filters
+import com.willfp.libreforge.getIntFromExpression
 import com.willfp.libreforge.triggers.TriggerData
 
 sealed class FilterPlayerNoDamageTicks(id: String) : Filter<NoCompileData, Int>(id) {
 
     final override fun getValue(config: Config, data: TriggerData?, key: String): Int {
-        return config.getIntFromExpression(key)
+        return config.getIntFromExpression(key, data)
     }
 
     final override fun isMet(data: TriggerData, value: Int, compileData: NoCompileData): Boolean {

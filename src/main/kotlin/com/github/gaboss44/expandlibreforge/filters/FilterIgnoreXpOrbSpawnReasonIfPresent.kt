@@ -7,7 +7,7 @@ import com.willfp.libreforge.NoCompileData
 import com.willfp.libreforge.triggers.TriggerData
 import org.bukkit.entity.ExperienceOrb
 
-object FilterXpOrbSpawnReason : XpOrbFilter<NoCompileData, Collection<String>>("xp_orb_spawn_reason") {
+object FilterIgnoreXpOrbSpawnReasonIfPresent : XpOrbFilter<NoCompileData, Collection<String>>("ignore_xp_orb_spawn_reason_if_present") {
     override fun getValue(config: Config, data: TriggerData?, key: String): Collection<String> {
         return config.getStrings(key)
     }
@@ -18,6 +18,6 @@ object FilterXpOrbSpawnReason : XpOrbFilter<NoCompileData, Collection<String>>("
         compileData: NoCompileData,
         orb: ExperienceOrb
     ): Boolean {
-        return value.containsIgnoreCase(orb.spawnReason.name)
+        return !value.containsIgnoreCase(orb.spawnReason.name)
     }
 }

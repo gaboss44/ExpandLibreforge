@@ -19,9 +19,10 @@ object EffectEndCombo : Effect<NoCompileData>("end_combo") {
     }
 
     override fun onTrigger(config: Config, data: TriggerData, compileData: NoCompileData): Boolean {
-        val playerId = data.player?.uniqueId ?: return false
+        val player = data.player ?: return false
         val comboName = config.getFormattedString("name", data)
-        ComboManager.endCombo(playerId, comboName)
+        val updateEffects = config.getBool("update_effects")
+        ComboManager.endCombo(player, comboName, updateEffects)
         return true
     }
 }

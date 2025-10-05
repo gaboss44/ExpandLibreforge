@@ -4,12 +4,13 @@ import com.willfp.eco.core.config.interfaces.Config
 import com.willfp.libreforge.NoCompileData
 import com.willfp.libreforge.filters.Filter
 import com.willfp.libreforge.filters.Filters
+import com.willfp.libreforge.getDoubleFromExpression
 import com.willfp.libreforge.triggers.TriggerData
 import org.bukkit.event.player.PlayerExpChangeEvent
 
 sealed class FilterXpChange(id: String) : Filter<NoCompileData, Double>(id) {
     final override fun getValue(config: Config, data: TriggerData?, key: String): Double {
-        return config.getDoubleFromExpression(key)
+        return config.getDoubleFromExpression(key, data)
     }
 
     final override fun isMet(data: TriggerData, value: Double, compileData: NoCompileData): Boolean {

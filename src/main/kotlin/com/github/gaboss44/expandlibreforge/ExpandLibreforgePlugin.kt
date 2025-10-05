@@ -3,6 +3,7 @@ package com.github.gaboss44.expandlibreforge
 import com.github.gaboss44.expandlibreforge.conditions.ConditionHasCombo
 import com.github.gaboss44.expandlibreforge.conditions.ConditionPlayerCurrentInput
 import com.github.gaboss44.expandlibreforge.effects.*
+import com.github.gaboss44.expandlibreforge.features.combo.ComboPlaceholder
 import com.github.gaboss44.expandlibreforge.filters.*
 import com.github.gaboss44.expandlibreforge.triggers.*
 import com.github.gaboss44.expandlibreforge.mutators.*
@@ -54,6 +55,8 @@ class ExpandLibreforgePlugin : LibreforgePlugin() {
         Effects.register(EffectSetComboUpdateTicks)
         Effects.register(EffectSetComboStartTicks)
 
+        Effects.register(EffectSetComboTriggerShouldUpdateEffects)
+
         Effects.register(EffectSetDamageModifier)
 
         Effects.register(EffectPutDamageMultiplier)
@@ -74,7 +77,13 @@ class ExpandLibreforgePlugin : LibreforgePlugin() {
         TriggerComboEnd.registerAllInto(Triggers)
         TriggerComboTick.registerAllInto(Triggers)
 
+        TriggerOfflineComboEnd.registerAllInto(Triggers)
+        TriggerOfflineComboTick.registerAllInto(Triggers)
+
         Triggers.register(TriggerToggleShield)
+
+        TriggerProjectileHits.registerAllInto(Triggers)
+        TriggerHitByProjectile.registerAllInto(Triggers)
 
         Mutators.register(MutatorAttackDamageAsValue)
         Mutators.register(MutatorAttackDamageAsAltValue)
@@ -124,12 +133,19 @@ class ExpandLibreforgePlugin : LibreforgePlugin() {
 
         FilterXpOrbExperience.registerAllInto(Filters)
 
-        Filters.register(FilterXpOrbSpawnReason)
-        Filters.register(FilterXpOrbNotSpawnReason)
+        Filters.register(FilterMatchXpOrbSpawnReasonIfPresent)
+        Filters.register(FilterIgnoreXpOrbSpawnReasonIfPresent)
 
         Filters.register(FilterHasAnyCombo)
-        Filters.register(FilterMatchComboIfAny)
-        Filters.register(FilterIgnoreComboIfAny)
+
+        Filters.register(FilterComboIsPresent)
+        Filters.register(FilterMatchComboIfPresent)
+        Filters.register(FilterIgnoreComboIfPresent)
+        Filters.register(FilterHasCombos)
+
+        FilterComboCount.registerAllInto(Filters)
+        FilterComboScore.registerAllInto(Filters)
+        FilterComboRemainingTicks.registerAllInto(Filters)
 
         if (Prerequisite.HAS_1_20_5.isMet) {
             Filters.register(FilterDamageType)
@@ -149,6 +165,11 @@ class ExpandLibreforgePlugin : LibreforgePlugin() {
 
             Conditions.register(ConditionPlayerCurrentInput)
         }
+
+        ComboPlaceholder.createHas(this).register()
+        ComboPlaceholder.createCount(this).register()
+        ComboPlaceholder.createScore(this).register()
+        ComboPlaceholder.createRemainingTicks(this).register()
     }
 
     override fun loadListeners(): List<Listener> {

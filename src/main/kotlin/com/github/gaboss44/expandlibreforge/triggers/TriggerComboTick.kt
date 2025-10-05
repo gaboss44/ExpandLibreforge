@@ -25,7 +25,7 @@ sealed class TriggerComboTick(id: String) : Trigger(id) {
                 player = player,
                 event = event,
                 value = event.combo.count.toDouble(),
-                altValue = event.updateTicks.toDouble(),
+                altValue = event.combo.score,
             )
         )
     }

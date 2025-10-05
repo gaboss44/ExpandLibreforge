@@ -6,14 +6,14 @@ import org.bukkit.entity.Player
 import org.bukkit.event.Cancellable
 import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
-import org.bukkit.event.player.PlayerEvent
 
 class PlayerComboTickEvent(
     override val parent: Event? = null,
     player: Player,
-    val combo: Combo,
+    combo: Combo,
+    shouldUpdateEffects: Boolean = false,
     updateTicks: Int
-) : PlayerEvent(player), Cancellable, Parental {
+) : PlayerComboEvent(player, combo, shouldUpdateEffects), Cancellable, Parental {
 
     private var ticks: Int = updateTicks
 

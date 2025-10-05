@@ -7,6 +7,7 @@ data class Combo(
     val name: String,
     val playerId: UUID,
     val count: Int,
+    val score: Double,
     val remainingTicks: Int,
     val phase: ComboPhase
 ) {

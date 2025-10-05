@@ -5,6 +5,7 @@ import com.github.gaboss44.expandlibreforge.filters.*
 import com.github.gaboss44.expandlibreforge.triggers.TriggerBlockingCheck
 import com.github.gaboss44.expandlibreforge.triggers.TriggerDisableShield
 import com.github.gaboss44.expandlibreforge.triggers.TriggerInflictKnockback
+import com.github.gaboss44.expandlibreforge.triggers.TriggerLocalMove
 import com.github.gaboss44.expandlibreforge.triggers.TriggerServerTickEnd
 import com.github.gaboss44.expandlibreforge.triggers.TriggerServerTickStart
 import com.github.gaboss44.expandlibreforge.triggers.TriggerShieldDisable
@@ -27,7 +28,7 @@ object PaperIntegration : LoadableIntegration {
                 Int::class.javaPrimitiveType!!,
                 Float::class.javaPrimitiveType!!,
                 ItemStack::class.java
-            )) {
+        )) {
             Effects.register(EffectDoRiptideSpin)
         }
 
@@ -37,6 +38,8 @@ object PaperIntegration : LoadableIntegration {
 
         TriggerShieldDisable.registerAllInto(Triggers)
         TriggerDisableShield.registerAllInto(Triggers)
+
+        TriggerLocalMove.registerAllInto(Triggers)
 
         if (ClassUtils.exists("io.papermc.paper.event.entity.EntityKnockbackEvent")) {
             TriggerTakeKnockback.registerAllInto(Triggers)

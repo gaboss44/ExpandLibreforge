@@ -79,12 +79,7 @@ sealed class TriggerShieldDisable(id: String) : Trigger(id) {
 
     object Monitor : TriggerShieldDisable("shield_disable_monitor") {
         @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-        fun onShieldDisable(event: PlayerShieldDisableEvent) {
-            handle(event)
-            if (!event.isCancelled) {
-                event.player.toDispatcher().updateEffects()
-            }
-        }
+        fun onShieldDisable(event: PlayerShieldDisableEvent) = handle(event)
     }
 
     object Default : TriggerShieldDisable("shield_disable") {

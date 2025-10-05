@@ -5,6 +5,7 @@ import com.willfp.eco.core.config.interfaces.Config
 import com.willfp.libreforge.NoCompileData
 import com.willfp.libreforge.arguments
 import com.willfp.libreforge.effects.Effect
+import com.willfp.libreforge.getDoubleFromExpression
 import com.willfp.libreforge.getFormattedString
 import com.willfp.libreforge.getIntFromExpression
 import com.willfp.libreforge.triggers.TriggerData
@@ -21,10 +22,12 @@ object EffectStartCombo : Effect<NoCompileData>("start_combo") {
     }
 
     override fun onTrigger(config: Config, data: TriggerData, compileData: NoCompileData): Boolean {
-        val playerId = data.player?.uniqueId ?: return false
+        val player = data.player ?: return false
         val comboName = config.getFormattedString("name", data)
         val duration = config.getIntFromExpression("duration", data)
-        ComboManager.startCombo(playerId, comboName, 1, duration)
+        val score = config.getDoubleFromExpression("score", data)
+        val updateEffects = config.getBool("update_effects")
+        ComboManager.startCombo(player, comboName, 1, score, duration, updateEffects)
         return true
     }
 }

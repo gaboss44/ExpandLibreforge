@@ -1,6 +1,7 @@
 package com.github.gaboss44.expandlibreforge.conditions
 
 import com.github.gaboss44.expandlibreforge.features.combo.ComboManager
+import com.github.gaboss44.expandlibreforge.util.check
 import com.willfp.eco.core.config.interfaces.Config
 import com.willfp.eco.core.placeholder.context.PlaceholderContext
 import com.willfp.libreforge.Dispatcher
@@ -26,17 +27,6 @@ object ConditionHasCombo : Condition<NoCompileData>("has_combo") {
         val name = config.getFormattedString("name", PlaceholderContext(player))
         val combo = ComboManager.getCombo(player.uniqueId, name) ?: return false
 
-        fun Config.getOptionalInt(key: String): Int? =
-            if (this.has(key)) this.getIntFromExpression(key, player) else null
-
-        config.getOptionalInt("count_equals")?.let { if (combo.count != it) return false }
-        config.getOptionalInt("count_above")?.let { if (combo.count <= it) return false }
-        config.getOptionalInt("count_below")?.let { if (combo.count >= it) return false }
-
-        config.getOptionalInt("remaining_ticks_equals")?.let { if (combo.remainingTicks != it) return false }
-        config.getOptionalInt("remaining_ticks_above")?.let { if (combo.remainingTicks <= it) return false }
-        config.getOptionalInt("remaining_ticks_below")?.let { if (combo.remainingTicks >= it) return false }
-
-        return true
+        return config.check(combo, player)
     }
 }

@@ -1,8 +1,12 @@
 package com.github.gaboss44.expandlibreforge.util
 
 import com.destroystokyo.paper.event.entity.EntityKnockbackByEntityEvent
+import com.github.gaboss44.expandlibreforge.features.combo.Combo
 import com.willfp.eco.core.Prerequisite
 import com.willfp.eco.core.config.interfaces.Config
+import com.willfp.libreforge.getDoubleFromExpression
+import com.willfp.libreforge.getIntFromExpression
+import com.willfp.libreforge.triggers.TriggerData
 import io.papermc.paper.event.player.PlayerShieldDisableEvent
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
@@ -95,4 +99,60 @@ fun Config.getDamageModifierEnum(key: String): EntityDamageEvent.DamageModifier?
     } catch (_: IllegalArgumentException) {
         null
     }
+}
+
+fun Config.check(combo: Combo, data: TriggerData?): Boolean {
+    fun Config.getOptionalInt(key: String): Int? =
+        if (this.has(key)) this.getIntFromExpression(key, data) else null
+
+    fun Config.getOptionalDouble(key: String): Double? =
+        if (this.has(key)) this.getDoubleFromExpression(key, data) else null
+
+    this.getOptionalInt("count_equals")?.let { if (combo.count != it) return false }
+    this.getOptionalInt("count_greater_than")?.let { if (combo.count <= it) return false }
+    this.getOptionalInt("count_lower_than")?.let { if (combo.count >= it) return false }
+    this.getOptionalInt("count_at_least")?.let { if (combo.count < it) return false }
+    this.getOptionalInt("count_at_most")?.let { if (combo.count > it) return false }
+
+    this.getOptionalInt("remaining_ticks_equals")?.let { if (combo.remainingTicks != it) return false }
+    this.getOptionalInt("remaining_ticks_greater_than")?.let { if (combo.remainingTicks <= it) return false }
+    this.getOptionalInt("remaining_ticks_lower_than")?.let { if (combo.remainingTicks >= it) return false }
+    this.getOptionalInt("remaining_ticks_at_least")?.let { if (combo.remainingTicks < it) return false }
+    this.getOptionalInt("remaining_ticks_at_most")?.let { if (combo.remainingTicks > it) return false }
+
+    this.getOptionalDouble("score_equals")?.let { if (combo.score != it) return false }
+    this.getOptionalDouble("score_greater_than")?.let { if (combo.score <= it) return false }
+    this.getOptionalDouble("score_lower_than")?.let { if (combo.score >= it) return false }
+    this.getOptionalDouble("score_at_least")?.let { if (combo.score < it) return false }
+    this.getOptionalDouble("score_at_most")?.let { if (combo.score > it) return false }
+
+    return true
+}
+
+fun Config.check(combo: Combo, player: Player): Boolean {
+    fun Config.getOptionalInt(key: String): Int? =
+        if (this.has(key)) this.getIntFromExpression(key, player) else null
+
+    fun Config.getOptionalDouble(key: String): Double? =
+        if (this.has(key)) this.getDoubleFromExpression(key, player) else null
+
+    this.getOptionalInt("count_equals")?.let { if (combo.count != it) return false }
+    this.getOptionalInt("count_greater_than")?.let { if (combo.count <= it) return false }
+    this.getOptionalInt("count_lower_than")?.let { if (combo.count >= it) return false }
+    this.getOptionalInt("count_at_least")?.let { if (combo.count < it) return false }
+    this.getOptionalInt("count_at_most")?.let { if (combo.count > it) return false }
+
+    this.getOptionalInt("remaining_ticks_equals")?.let { if (combo.remainingTicks != it) return false }
+    this.getOptionalInt("remaining_ticks_greater_than")?.let { if (combo.remainingTicks <= it) return false }
+    this.getOptionalInt("remaining_ticks_lower_than")?.let { if (combo.remainingTicks >= it) return false }
+    this.getOptionalInt("remaining_ticks_at_least")?.let { if (combo.remainingTicks < it) return false }
+    this.getOptionalInt("remaining_ticks_at_most")?.let { if (combo.remainingTicks > it) return false }
+
+    this.getOptionalDouble("score_equals")?.let { if (combo.score != it) return false }
+    this.getOptionalDouble("score_greater_than")?.let { if (combo.score <= it) return false }
+    this.getOptionalDouble("score_lower_than")?.let { if (combo.score >= it) return false }
+    this.getOptionalDouble("score_at_least")?.let { if (combo.score < it) return false }
+    this.getOptionalDouble("score_at_most")?.let { if (combo.score > it) return false }
+
+    return true
 }
