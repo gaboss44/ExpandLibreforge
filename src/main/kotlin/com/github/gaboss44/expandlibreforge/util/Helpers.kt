@@ -14,6 +14,8 @@ import org.bukkit.entity.Projectile
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
 
+const val floatHalfMaxValue = Float.MAX_VALUE / 2
+
 fun EntityDamageByEntityEvent.tryDamagerAsPlayer(): Player? {
     return when (val damager = this.damager) {
         is Player -> damager

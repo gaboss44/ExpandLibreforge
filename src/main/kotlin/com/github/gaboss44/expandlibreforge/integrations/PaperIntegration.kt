@@ -2,6 +2,7 @@ package com.github.gaboss44.expandlibreforge.integrations
 
 import com.github.gaboss44.expandlibreforge.effects.*
 import com.github.gaboss44.expandlibreforge.filters.*
+import com.github.gaboss44.expandlibreforge.triggers.TriggerAttackCriticalCheck
 import com.github.gaboss44.expandlibreforge.triggers.TriggerBlockingCheck
 import com.github.gaboss44.expandlibreforge.triggers.TriggerDisableShield
 import com.github.gaboss44.expandlibreforge.triggers.TriggerInflictKnockback
@@ -53,6 +54,18 @@ object PaperIntegration : LoadableIntegration {
         if (ClassUtils.exists("io.papermc.paper.event.entity.EntityBlockingDelayCheckEvent")) {
             Triggers.register(TriggerBlockingCheck)
             Effects.register(EffectSetBlockingDelay)
+        }
+
+        if (ClassUtils.exists("io.papermc.paper.event.player.PlayerAttackEntityCriticalCheckEvent")) {
+            TriggerAttackCriticalCheck.registerAllInto(Triggers)
+
+            Filters.register(FilterWasOriginallyCritical)
+            Filters.register(FilterIsCritical)
+
+            FilterCriticalMultiplier.registerAllInto(Filters)
+            FilterOriginalCriticalMultiplier.registerAllInto(Filters)
+
+            Effects.register(EffectSetCriticalAttack)
         }
 
         Triggers.register(TriggerServerTickStart)

@@ -4,9 +4,9 @@ import com.willfp.eco.core.config.interfaces.Config
 import com.willfp.libreforge.NoCompileData
 import com.willfp.libreforge.filters.Filter
 import com.willfp.libreforge.triggers.TriggerData
-import org.bukkit.event.entity.EntityDamageByEntityEvent
+import io.papermc.paper.event.player.PlayerAttackEntityCriticalCheckEvent
 
-object FilterCritical : Filter<NoCompileData, Boolean>("critical") {
+object FilterIsCritical : Filter<NoCompileData, Boolean>("is_critical") {
     override fun getValue(
         config: Config,
         data: TriggerData?,
@@ -14,7 +14,7 @@ object FilterCritical : Filter<NoCompileData, Boolean>("critical") {
     ) = config.getBoolOrNull(key) ?: true
 
     override fun isMet(data: TriggerData, value: Boolean, compileData: NoCompileData): Boolean {
-        val event = data.event as? EntityDamageByEntityEvent ?: return true
+        val event = data.event as? PlayerAttackEntityCriticalCheckEvent ?: return true
         return event.isCritical == value
     }
 }
