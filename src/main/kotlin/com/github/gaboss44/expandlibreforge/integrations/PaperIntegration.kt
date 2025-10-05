@@ -2,7 +2,6 @@ package com.github.gaboss44.expandlibreforge.integrations
 
 import com.github.gaboss44.expandlibreforge.effects.*
 import com.github.gaboss44.expandlibreforge.filters.*
-import com.github.gaboss44.expandlibreforge.triggers.TriggerBlockingCheck
 import com.github.gaboss44.expandlibreforge.triggers.TriggerDisableShield
 import com.github.gaboss44.expandlibreforge.triggers.TriggerInflictKnockback
 import com.github.gaboss44.expandlibreforge.triggers.TriggerLocalMove
@@ -48,11 +47,6 @@ object PaperIntegration : LoadableIntegration {
             Effects.register(EffectSetKnockback)
 
             Filters.register(FilterKnockerIsPresent)
-        }
-
-        if (ClassUtils.exists("io.papermc.paper.event.entity.EntityBlockingDelayCheckEvent")) {
-            Triggers.register(TriggerBlockingCheck)
-            Effects.register(EffectSetBlockingDelay)
         }
 
         Triggers.register(TriggerServerTickStart)
