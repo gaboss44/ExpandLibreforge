@@ -30,31 +30,31 @@ sealed class FilterPlayerAttackCooldown(id: String) : Filter<NoCompileData, Doub
         }
     }
 
-    object Equals : FilterPlayerAttackCooldown("player_cooldown_equals") {
+    object Equals : FilterPlayerAttackCooldown("player_attack_cooldown_equals") {
         override fun compare(playerCooldown: Double, value: Double): Boolean {
             return playerCooldown == value
         }
     }
 
-    object AtLeast : FilterPlayerAttackCooldown("player_cooldown_at_least") {
+    object AtLeast : FilterPlayerAttackCooldown("player_attack_cooldown_at_least") {
         override fun compare(playerCooldown: Double, value: Double): Boolean {
             return playerCooldown >= value
         }
     }
 
-    object AtMost : FilterPlayerAttackCooldown("player_cooldown_at_most") {
+    object AtMost : FilterPlayerAttackCooldown("player_attack_cooldown_at_most") {
         override fun compare(playerCooldown: Double, value: Double): Boolean {
             return playerCooldown <= value
         }
     }
 
-    object GreaterThan : FilterPlayerAttackCooldown("player_cooldown_greater_than") {
+    object GreaterThan : FilterPlayerAttackCooldown("player_attack_cooldown_greater_than") {
         override fun compare(playerCooldown: Double, value: Double): Boolean {
             return playerCooldown > value
         }
     }
 
-    object LowerThan : FilterPlayerAttackCooldown("player_cooldown_lower_than") {
+    object LowerThan : FilterPlayerAttackCooldown("player_attack_cooldown_lower_than") {
         override fun compare(playerCooldown: Double, value: Double): Boolean {
             return playerCooldown < value
         }
