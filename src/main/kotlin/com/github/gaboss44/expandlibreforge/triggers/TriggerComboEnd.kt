@@ -33,6 +33,7 @@ sealed class TriggerComboEnd(id: String) : Trigger(id) {
     companion object {
         fun registerAllInto(category: Triggers) {
             category.register(Default)
+            category.register(Monitor)
             category.register(HighestPriority)
             category.register(HighPriority)
             category.register(NormalPriority)
@@ -43,6 +44,11 @@ sealed class TriggerComboEnd(id: String) : Trigger(id) {
 
     object Default : TriggerComboEnd("combo_end") {
         @EventHandler(ignoreCancelled = true)
+        fun onComboEnd(event: PlayerComboEndEvent) = handle(event)
+    }
+
+    object Monitor : TriggerComboEnd("combo_end_monitor") {
+        @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
         fun onComboEnd(event: PlayerComboEndEvent) = handle(event)
     }
 

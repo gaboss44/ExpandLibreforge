@@ -33,6 +33,7 @@ sealed class TriggerComboStart(id: String) : Trigger(id) {
     companion object {
         fun registerAllInto(category: Triggers) {
             category.register(Default)
+            category.register(Monitor)
             category.register(HighestPriority)
             category.register(HighPriority)
             category.register(NormalPriority)
@@ -43,6 +44,11 @@ sealed class TriggerComboStart(id: String) : Trigger(id) {
 
     object Default : TriggerComboStart("combo_start") {
         @EventHandler(ignoreCancelled = true)
+        fun onComboStart(event: PlayerComboStartEvent) = handle(event)
+    }
+
+    object Monitor : TriggerComboStart("combo_start_monitor") {
+        @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
         fun onComboStart(event: PlayerComboStartEvent) = handle(event)
     }
 
