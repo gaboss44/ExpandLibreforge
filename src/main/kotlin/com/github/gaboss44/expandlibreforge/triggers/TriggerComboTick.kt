@@ -33,6 +33,7 @@ sealed class TriggerComboTick(id: String) : Trigger(id) {
     companion object {
         fun registerAllInto(category: Triggers) {
             category.register(Default)
+            category.register(Monitor)
             category.register(HighestPriority)
             category.register(HighPriority)
             category.register(NormalPriority)
@@ -43,6 +44,11 @@ sealed class TriggerComboTick(id: String) : Trigger(id) {
 
     object Default : TriggerComboTick("combo_tick") {
         @EventHandler(ignoreCancelled = true)
+        fun onComboTick(event: PlayerComboTickEvent) = handle(event)
+    }
+
+    object Monitor : TriggerComboTick("combo_tick_monitor") {
+        @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
         fun onComboTick(event: PlayerComboTickEvent) = handle(event)
     }
 
