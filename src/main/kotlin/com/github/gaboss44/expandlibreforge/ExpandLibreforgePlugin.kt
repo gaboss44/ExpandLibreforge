@@ -94,6 +94,8 @@ class ExpandLibreforgePlugin : LibreforgePlugin() {
         Mutators.register(MutatorXpChangeAsValue)
         Mutators.register(MutatorXpChangeAsAltValue)
 
+        MutatorComboOwner.registerAllInto(Mutators)
+
         Conditions.register(ConditionHasCombo)
 
         Filters.register(FilterInventoryAction)
