@@ -2,13 +2,7 @@ package com.github.gaboss44.expandlibreforge.integrations
 
 import com.github.gaboss44.expandlibreforge.effects.*
 import com.github.gaboss44.expandlibreforge.filters.*
-import com.github.gaboss44.expandlibreforge.triggers.TriggerDisableShield
-import com.github.gaboss44.expandlibreforge.triggers.TriggerInflictKnockback
-import com.github.gaboss44.expandlibreforge.triggers.TriggerLocalMove
-import com.github.gaboss44.expandlibreforge.triggers.TriggerServerTickEnd
-import com.github.gaboss44.expandlibreforge.triggers.TriggerServerTickStart
-import com.github.gaboss44.expandlibreforge.triggers.TriggerShieldDisable
-import com.github.gaboss44.expandlibreforge.triggers.TriggerTakeKnockback
+import com.github.gaboss44.expandlibreforge.triggers.*
 import com.github.gaboss44.expandlibreforge.util.MethodUtils
 import com.willfp.eco.core.EcoPlugin
 import com.willfp.eco.util.ClassUtils
@@ -34,6 +28,8 @@ object PaperIntegration : LoadableIntegration {
         Effects.register(EffectSetReviveHealth)
 
         Effects.register(EffectSetShieldDisableCooldown)
+
+        Effects.register(EffectResetCurrentCooldownPeriod)
 
         TriggerShieldDisable.registerAllInto(Triggers)
         TriggerDisableShield.registerAllInto(Triggers)
@@ -61,6 +57,12 @@ object PaperIntegration : LoadableIntegration {
         Filters.register(FilterBeaconEffect)
 
         Filters.register(FilterCritical)
+
+        FilterPlayerCooledAttackStrength.registerAllInto(Filters)
+        FilterVictimCooledAttackStrength.registerAllInto(Filters)
+
+        FilterPlayerCurrentCooldownPeriod.registerAllInto(Filters)
+        FilterVictimCurrentCooldownPeriod.registerAllInto(Filters)
     }
 
     override fun getPluginName() = "Paper"

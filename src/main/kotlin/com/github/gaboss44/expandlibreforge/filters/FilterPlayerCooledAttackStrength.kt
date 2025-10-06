@@ -1,0 +1,63 @@
+package com.github.gaboss44.expandlibreforge.filters
+
+import com.willfp.eco.core.config.interfaces.Config
+import com.willfp.libreforge.NoCompileData
+import com.willfp.libreforge.filters.Filter
+import com.willfp.libreforge.filters.Filters
+import com.willfp.libreforge.getDoubleFromExpression
+import com.willfp.libreforge.triggers.TriggerData
+
+sealed class FilterPlayerCooledAttackStrength(id: String) : Filter<NoCompileData, Config>(id) {
+
+    final override fun getValue(config: Config, data: TriggerData?, key: String): Config {
+        return config
+    }
+
+    final override fun isMet(data: TriggerData, value: Config, compileData: NoCompileData): Boolean {
+        val player = data.player ?: return true
+        val cooledAttackStrength = player.getCooledAttackStrength(value.getDoubleFromExpression("adjust_ticks", data).toFloat())
+        return compare(cooledAttackStrength.toDouble(), value.getDoubleFromExpression("value", data))
+    }
+
+    abstract fun compare(cooledAttackStrength: Double, value: Double): Boolean
+
+    companion object {
+        fun registerAllInto(category: Filters) {
+            category.register(Equals)
+            category.register(AtLeast)
+            category.register(AtMost)
+            category.register(GreaterThan)
+            category.register(LowerThan)
+        }
+    }
+
+    object Equals : FilterPlayerCooledAttackStrength("player_cooled_attack_strength_equals") {
+        override fun compare(cooledAttackStrength: Double, value: Double): Boolean {
+            return cooledAttackStrength == value
+        }
+    }
+
+    object AtLeast : FilterPlayerCooledAttackStrength("player_cooled_attack_strength_at_least") {
+        override fun compare(cooledAttackStrength: Double, value: Double): Boolean {
+            return cooledAttackStrength >= value
+        }
+    }
+
+    object AtMost : FilterPlayerCooledAttackStrength("player_cooled_attack_strength_at_most") {
+        override fun compare(cooledAttackStrength: Double, value: Double): Boolean {
+            return cooledAttackStrength <= value
+        }
+    }
+
+    object GreaterThan : FilterPlayerCooledAttackStrength("player_cooled_attack_strength_greater_than") {
+        override fun compare(cooledAttackStrength: Double, value: Double): Boolean {
+            return cooledAttackStrength > value
+        }
+    }
+
+    object LowerThan : FilterPlayerCooledAttackStrength("player_cooled_attack_strength_lower_than") {
+        override fun compare(cooledAttackStrength: Double, value: Double): Boolean {
+            return cooledAttackStrength < value
+        }
+    }
+}

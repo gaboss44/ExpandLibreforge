@@ -18,7 +18,7 @@ sealed class FilterPlayerAttackCooldown(id: String) : Filter<NoCompileData, Doub
         return compare(player.attackCooldown.toDouble(), value)
     }
 
-    abstract fun compare(playerCooldown: Double, value: Double): Boolean
+    abstract fun compare(attackCooldown: Double, value: Double): Boolean
 
     companion object {
         fun registerAllInto(category: Filters) {
@@ -31,32 +31,32 @@ sealed class FilterPlayerAttackCooldown(id: String) : Filter<NoCompileData, Doub
     }
 
     object Equals : FilterPlayerAttackCooldown("player_attack_cooldown_equals") {
-        override fun compare(playerCooldown: Double, value: Double): Boolean {
-            return playerCooldown == value
+        override fun compare(attackCooldown: Double, value: Double): Boolean {
+            return attackCooldown == value
         }
     }
 
     object AtLeast : FilterPlayerAttackCooldown("player_attack_cooldown_at_least") {
-        override fun compare(playerCooldown: Double, value: Double): Boolean {
-            return playerCooldown >= value
+        override fun compare(attackCooldown: Double, value: Double): Boolean {
+            return attackCooldown >= value
         }
     }
 
     object AtMost : FilterPlayerAttackCooldown("player_attack_cooldown_at_most") {
-        override fun compare(playerCooldown: Double, value: Double): Boolean {
-            return playerCooldown <= value
+        override fun compare(attackCooldown: Double, value: Double): Boolean {
+            return attackCooldown <= value
         }
     }
 
     object GreaterThan : FilterPlayerAttackCooldown("player_attack_cooldown_greater_than") {
-        override fun compare(playerCooldown: Double, value: Double): Boolean {
-            return playerCooldown > value
+        override fun compare(attackCooldown: Double, value: Double): Boolean {
+            return attackCooldown > value
         }
     }
 
     object LowerThan : FilterPlayerAttackCooldown("player_attack_cooldown_lower_than") {
-        override fun compare(playerCooldown: Double, value: Double): Boolean {
-            return playerCooldown < value
+        override fun compare(attackCooldown: Double, value: Double): Boolean {
+            return attackCooldown < value
         }
     }
 }

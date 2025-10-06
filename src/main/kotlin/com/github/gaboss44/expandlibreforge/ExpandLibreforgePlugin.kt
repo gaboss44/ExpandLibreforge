@@ -151,6 +151,7 @@ class ExpandLibreforgePlugin : LibreforgePlugin() {
         FilterVictimAttackCooldown.registerAllInto(Filters)
 
         Filters.register(FilterVictimIsHumanEntity)
+        Filters.register(FilterVictimIsPlayer)
 
         if (Prerequisite.HAS_1_20_5.isMet) {
             Filters.register(FilterDamageType)
