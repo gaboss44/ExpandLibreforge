@@ -11,7 +11,7 @@ import org.bukkit.entity.Player
 sealed class FilterVictimCooledAttackStrength(id: String) : Filter<NoCompileData, Config>(id) {
 
     final override fun getValue(config: Config, data: TriggerData?, key: String): Config {
-        return config
+        return config.getSubsection(key)
     }
 
     final override fun isMet(data: TriggerData, value: Config, compileData: NoCompileData): Boolean {
