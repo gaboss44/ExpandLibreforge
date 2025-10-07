@@ -56,7 +56,7 @@ object ComboManager {
                 if (!tickEvent.isCancelled) {
                     combos[combo.name] = combo.copy(
                         remainingTicks = tickEvent.updateTicks,
-                        maximumTicks = max(tickEvent.updateTicks, combo.remainingTicks),
+                        maximumTicks = max(tickEvent.updateTicks, combo.maximumTicks),
                         phase = ComboPhase.IDLE
                     )
                     updated = tickEvent.shouldUpdateEffects
@@ -80,7 +80,7 @@ object ComboManager {
                 else {
                     combos[combo.name] = combo.copy(
                         remainingTicks = endEvent.renewalTicks,
-                        maximumTicks = max(endEvent.renewalTicks, combo.remainingTicks),
+                        maximumTicks = max(endEvent.renewalTicks, combo.maximumTicks),
                         phase = ComboPhase.IDLE
                     )
                 }
@@ -114,7 +114,7 @@ object ComboManager {
                 if (!tickEvent.isCancelled) {
                     combos[combo.name] = combo.copy(
                         remainingTicks = tickEvent.updateTicks,
-                        maximumTicks = max(tickEvent.updateTicks, combo.remainingTicks),
+                        maximumTicks = max(tickEvent.updateTicks, combo.maximumTicks),
                         phase = ComboPhase.IDLE
                     )
                 } else combos[combo.name] = combo.copy(
@@ -135,7 +135,7 @@ object ComboManager {
                 else {
                     combos[combo.name] = combo.copy(
                         remainingTicks = endEvent.renewalTicks,
-                        maximumTicks = max(endEvent.renewalTicks, combo.remainingTicks),
+                        maximumTicks = max(endEvent.renewalTicks, combo.maximumTicks),
                         phase = ComboPhase.IDLE
                     )
                 }
@@ -197,7 +197,7 @@ object ComboManager {
         if (event.isCancelled) {
             combos[combo.name] = combo.copy(
                 remainingTicks = event.renewalTicks,
-                maximumTicks = max(event.renewalTicks, combo.remainingTicks),
+                maximumTicks = max(event.renewalTicks, combo.maximumTicks),
                 phase = ComboPhase.IDLE
             )
         } else {
@@ -214,7 +214,7 @@ object ComboManager {
         val updatedCombo = combo.copy(
             count = combo.count + 1,
             remainingTicks = ticks,
-            maximumTicks = max(combo.remainingTicks, ticks),
+            maximumTicks = max(combo.maximumTicks, ticks),
             score = combo.score + score,
         )
         combos[comboName] = updatedCombo
