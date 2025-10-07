@@ -11,6 +11,7 @@ import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.event.Event
 import java.util.UUID
+import kotlin.math.max
 
 object ComboManager {
 
@@ -41,19 +42,21 @@ object ComboManager {
         var updated = false
         for (combo in combos.values.toList()) {
             if (combo.remainingTicks > 0) {
+                val updateTicks = combo.remainingTicks - consumeTicks
                 val tickEvent = PlayerComboTickEvent(
                     player = player,
                     combo = combo.copy(
                         phase = ComboPhase.TICK
                     ),
                     shouldUpdateEffects = updateEffects,
-                    updateTicks = combo.remainingTicks - consumeTicks,
+                    updateTicks = updateTicks,
                     parent = event
                 )
                 Bukkit.getPluginManager().callEvent(tickEvent)
                 if (!tickEvent.isCancelled) {
                     combos[combo.name] = combo.copy(
                         remainingTicks = tickEvent.updateTicks,
+                        maximumTicks = max(tickEvent.updateTicks, combo.remainingTicks),
                         phase = ComboPhase.IDLE
                     )
                     updated = tickEvent.shouldUpdateEffects
@@ -77,6 +80,7 @@ object ComboManager {
                 else {
                     combos[combo.name] = combo.copy(
                         remainingTicks = endEvent.renewalTicks,
+                        maximumTicks = max(endEvent.renewalTicks, combo.remainingTicks),
                         phase = ComboPhase.IDLE
                     )
                 }
@@ -98,17 +102,19 @@ object ComboManager {
         val combos = delegate[playerId] ?: return
         for (combo in combos.values.toList()) {
             if (combo.remainingTicks > 0) {
+                val updateTicks = combo.remainingTicks - consumeTicks
                 val tickEvent = OfflineComboTickEvent(
                     combo = combo.copy(
                         phase = ComboPhase.TICK
                     ),
-                    updateTicks = combo.remainingTicks - consumeTicks,
+                    updateTicks = updateTicks,
                     parent = event
                 )
                 Bukkit.getPluginManager().callEvent(tickEvent)
                 if (!tickEvent.isCancelled) {
                     combos[combo.name] = combo.copy(
                         remainingTicks = tickEvent.updateTicks,
+                        maximumTicks = max(tickEvent.updateTicks, combo.remainingTicks),
                         phase = ComboPhase.IDLE
                     )
                 } else combos[combo.name] = combo.copy(
@@ -129,6 +135,7 @@ object ComboManager {
                 else {
                     combos[combo.name] = combo.copy(
                         remainingTicks = endEvent.renewalTicks,
+                        maximumTicks = max(endEvent.renewalTicks, combo.remainingTicks),
                         phase = ComboPhase.IDLE
                     )
                 }
@@ -149,6 +156,8 @@ object ComboManager {
             playerId = player.uniqueId,
             count = count,
             remainingTicks = duration,
+            initialTicks = duration,
+            maximumTicks = duration,
             phase = ComboPhase.START,
             score = score
         )
@@ -164,6 +173,8 @@ object ComboManager {
         }
         combos[comboName] = combo.copy(
             remainingTicks = event.startTicks,
+            initialTicks = event.startTicks,
+            maximumTicks = event.startTicks,
             phase = ComboPhase.IDLE
         )
         if (event.shouldUpdateEffects) player.toDispatcher().updateEffects()
@@ -186,6 +197,7 @@ object ComboManager {
         if (event.isCancelled) {
             combos[combo.name] = combo.copy(
                 remainingTicks = event.renewalTicks,
+                maximumTicks = max(event.renewalTicks, combo.remainingTicks),
                 phase = ComboPhase.IDLE
             )
         } else {
@@ -202,6 +214,7 @@ object ComboManager {
         val updatedCombo = combo.copy(
             count = combo.count + 1,
             remainingTicks = ticks,
+            maximumTicks = max(combo.remainingTicks, ticks),
             score = combo.score + score,
         )
         combos[comboName] = updatedCombo

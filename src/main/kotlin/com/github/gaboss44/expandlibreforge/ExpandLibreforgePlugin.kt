@@ -178,6 +178,8 @@ class ExpandLibreforgePlugin : LibreforgePlugin() {
         ComboPlaceholder.createCount(this).register()
         ComboPlaceholder.createScore(this).register()
         ComboPlaceholder.createRemainingTicks(this).register()
+        ComboPlaceholder.createInitialTicks(this).register()
+        ComboPlaceholder.createMaximumTicks(this).register()
     }
 
     override fun loadListeners(): List<Listener> {

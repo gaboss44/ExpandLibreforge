@@ -9,6 +9,8 @@ data class Combo(
     val count: Int,
     val score: Double,
     val remainingTicks: Int,
+    val initialTicks: Int,
+    val maximumTicks: Int,
     val phase: ComboPhase
 ) {
     val player get() = Bukkit.getPlayer(playerId)
