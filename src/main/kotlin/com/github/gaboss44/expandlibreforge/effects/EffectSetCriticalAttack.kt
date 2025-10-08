@@ -3,7 +3,6 @@ package com.github.gaboss44.expandlibreforge.effects
 import com.github.gaboss44.expandlibreforge.util.floatHalfMaxValue
 import com.willfp.eco.core.config.interfaces.Config
 import com.willfp.eco.util.NumberUtils
-import com.willfp.eco.util.toNiceString
 import com.willfp.libreforge.NoCompileData
 import com.willfp.libreforge.effects.Effect
 import com.willfp.libreforge.toPlaceholderContext
@@ -28,11 +27,11 @@ object EffectSetCriticalAttack : Effect<NoCompileData>("set_critical_attack") {
         val multiplierStr = config.getStringOrNull("multiplier")
 
         if (multiplierStr != null && multiplierStr.isNotBlank()) {
-            val baseDamageStr = event.baseDamage.toNiceString()
-            val enchantedDamageStr = event.enchantedDamage.toNiceString()
-            val criticalMultiplier = event.criticalMultiplier.toNiceString()
-            val originalCriticalMultiplierStr = event.originalCriticalMultiplier.toNiceString()
-            val finalDamageStr = event.finalDamage.toNiceString()
+            val baseDamageStr = event.baseDamage.toString()
+            val enchantedDamageStr = event.enchantedDamage.toString()
+            val criticalMultiplier = event.criticalMultiplier.toString()
+            val originalCriticalMultiplierStr = event.originalCriticalMultiplier.toString()
+            val finalDamageStr = event.finalDamage.toString()
 
             val expr = multiplierStr
                 .replace("%base_damage%", baseDamageStr)
