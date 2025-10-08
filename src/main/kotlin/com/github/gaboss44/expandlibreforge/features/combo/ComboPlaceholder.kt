@@ -109,5 +109,20 @@ class ComboPlaceholder private constructor(
             pattern = patternInitialTicks,
             function = functionInitialTicks
         )
+
+        private val functionCompletedTicks = functionCompletedTicks@ { args: String, ctx: PlaceholderContext ->
+            val player = ctx.player ?: return@functionCompletedTicks null
+            val combos = ComboManager.getCombos(player.uniqueId) ?: return@functionCompletedTicks "0"
+            val combo = combos[args.replaceFirst("combo_completedticks_", "")] ?: return@functionCompletedTicks "0"
+            combo.completedTicks.toNiceString()
+        }
+
+        private val patternCompletedTicks = Pattern.compile("^combo_completedticks_(\\S+)$")
+
+        fun createCompletedTicks(plugin: ExpandLibreforgePlugin) = ComboPlaceholder(
+            plugin = plugin,
+            pattern = patternCompletedTicks,
+            function = functionCompletedTicks
+        )
     }
 }

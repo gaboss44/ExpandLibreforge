@@ -14,12 +14,12 @@ import com.willfp.libreforge.getFormattedString
 import com.willfp.libreforge.toPlaceholderContext
 import com.willfp.libreforge.triggers.TriggerData
 import com.willfp.libreforge.triggers.TriggerParameter
+import org.bukkit.Bukkit
 import org.bukkit.SoundCategory
-import org.bukkit.entity.Player
 
-object EffectPlaySoundKey : Effect<NoCompileData>("play_sound_key") {
+object EffectPlaySoundKeyToWorld : Effect<NoCompileData>("play_sound_key_to_world") {
     override val parameters = setOf(
-        TriggerParameter.PLAYER
+        TriggerParameter.LOCATION
     )
 
     override val arguments = arguments {
@@ -29,20 +29,20 @@ object EffectPlaySoundKey : Effect<NoCompileData>("play_sound_key") {
     }
 
     override fun onTrigger(config: Config, data: TriggerData, compileData: NoCompileData): Boolean {
-        val target = EntityTarget[config.getString("target")]?.getEntity(data) as? Player ?: data.player ?: return false
+        val location = data.location?.clone() ?: return false
 
-        val targetLocation = target.location
+        val worldStr = if (config.has("world")) config.getFormattedString("world", data) else null
+
+        val world = worldStr?.let { Bukkit.getWorld(worldStr) } ?: location.world
 
         val center = EntityTarget[config.getString("center")]?.getEntity(data)
 
-        val centerLocation = center?.location ?: data.location?.clone() ?: targetLocation
-
-        if (config.getBool("require_same_world") && targetLocation.world != centerLocation.world) return false
+        val centerLocation = center?.location ?: location
 
         val offX = config.getDoubleFromExpression("off_x", data)
         val offY = config.getDoubleFromExpression("off_y", data)
         val offZ = config.getDoubleFromExpression("off_z", data)
-        centerLocation.add(offX, offY, offZ)
+        location.add(offX, offY, offZ)
 
         val sound = config.getFormattedString("sound", data)
         val pitch = config.getDoubleFromExpression("pitch", data)
@@ -56,30 +56,30 @@ object EffectPlaySoundKey : Effect<NoCompileData>("play_sound_key") {
         val volumeMultiplier = config.getStringOrNull("volume_multiplier")
             ?.takeUnless { it.isBlank() }
             ?.let { multiplierStr ->
-                val targetXStr = targetLocation.x.toNiceString()
-                val targetYStr = targetLocation.y.toNiceString()
-                val targetZStr = targetLocation.z.toNiceString()
-
                 val centerXStr = centerLocation.x.toNiceString()
                 val centerYStr = centerLocation.y.toNiceString()
                 val centerZStr = centerLocation.z.toNiceString()
 
-                val distanceStr = targetLocation.toVector().distanceSquared(centerLocation.toVector()).toFloat().toString()
+                val locationXStr = location.x.toNiceString()
+                val locationYStr = location.y.toNiceString()
+                val locationZStr = location.z.toNiceString()
+
+                val distanceStr = centerLocation.toVector().distanceSquared(location.toVector()).toFloat().toString()
 
                 val expr = multiplierStr
-                    .replace("%target_x%", targetXStr)
-                    .replace("%target_y%", targetYStr)
-                    .replace("%target_z%", targetZStr)
                     .replace("%center_x%", centerXStr)
                     .replace("%center_y%", centerYStr)
                     .replace("%center_z%", centerZStr)
+                    .replace("%location_x%", locationXStr)
+                    .replace("%location_y%", locationYStr)
+                    .replace("%location_z%", locationZStr)
                     .replace("%distance%", distanceStr)
-                    .replace("%tx%", targetXStr)
-                    .replace("%ty%", targetYStr)
-                    .replace("%tz%", targetZStr)
                     .replace("%cx%", centerXStr)
                     .replace("%cy%", centerYStr)
                     .replace("%cz%", centerZStr)
+                    .replace("%lx%", locationXStr)
+                    .replace("%ly%", locationYStr)
+                    .replace("%lz%", locationZStr)
                     .replace("%d%", distanceStr)
 
                 NumberUtils.evaluateExpression(expr, config.toPlaceholderContext(data)).toFloat()
@@ -87,10 +87,10 @@ object EffectPlaySoundKey : Effect<NoCompileData>("play_sound_key") {
 
         if (Prerequisite.HAS_1_20_3.isMet && config.has("seed")) {
             val seed = config.getDoubleFromExpression("seed", data).toLong()
-            target.playSound(centerLocation, sound, category, volume.toFloat() * volumeMultiplier, pitch.toFloat(), seed)
+            world.playSound(centerLocation, sound, category, volume.toFloat() * volumeMultiplier, pitch.toFloat(), seed)
         }
 
-        else target.playSound(centerLocation, sound, category, volume.toFloat() * volumeMultiplier, pitch.toFloat())
+        else world.playSound(centerLocation, sound, category, volume.toFloat() * volumeMultiplier, pitch.toFloat())
 
         return true
     }
