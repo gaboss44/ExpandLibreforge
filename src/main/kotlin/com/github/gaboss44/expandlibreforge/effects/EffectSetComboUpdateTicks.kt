@@ -1,6 +1,6 @@
 package com.github.gaboss44.expandlibreforge.effects
 
-import com.github.gaboss44.expandlibreforge.events.combo.PlayerComboTickEvent
+import com.github.gaboss44.expandlibreforge.events.combo.ComboTickEvent
 import com.willfp.eco.core.config.interfaces.Config
 import com.willfp.libreforge.NoCompileData
 import com.willfp.libreforge.arguments
@@ -19,7 +19,7 @@ object EffectSetComboUpdateTicks : Effect<NoCompileData>("set_combo_update_ticks
     }
 
     override fun onTrigger(config: Config, data: TriggerData, compileData: NoCompileData): Boolean {
-        val event = data.event as? PlayerComboTickEvent ?: return false
+        val event = data.event as? ComboTickEvent ?: return false
         val value = config.getIntFromExpression("value", data)
         event.updateTicks = value
         return true

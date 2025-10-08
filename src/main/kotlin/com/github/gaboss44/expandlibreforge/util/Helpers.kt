@@ -8,6 +8,7 @@ import com.willfp.libreforge.getDoubleFromExpression
 import com.willfp.libreforge.getIntFromExpression
 import com.willfp.libreforge.triggers.TriggerData
 import io.papermc.paper.event.player.PlayerShieldDisableEvent
+import org.bukkit.SoundCategory
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.entity.Projectile
@@ -155,4 +156,16 @@ fun Config.check(combo: Combo, player: Player): Boolean {
     this.getOptionalDouble("score_at_most")?.let { if (combo.score > it) return false }
 
     return true
+}
+
+fun getSoundCategoryOrElse(string: String?, default: SoundCategory): SoundCategory {
+    return try {
+        if (string == null) {
+            default
+        } else {
+            SoundCategory.valueOf(string.uppercase())
+        }
+    } catch (_: IllegalArgumentException) {
+        default
+    }
 }

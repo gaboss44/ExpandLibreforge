@@ -12,14 +12,8 @@ class PlayerComboEndEvent(
     player: Player,
     combo: Combo,
     shouldUpdateEffects: Boolean = false,
-    renewalTicks: Int
-) : PlayerComboEvent(player, combo, shouldUpdateEffects), Cancellable, Parental {
-
-    private var ticks = renewalTicks
-
-    var renewalTicks: Int
-        get() = ticks
-        set(value) { ticks = value }
+    override var renewalTicks: Int
+) : PlayerComboEvent(player, combo, shouldUpdateEffects), ComboEndEvent {
 
     private var cancelled: Boolean = false
 

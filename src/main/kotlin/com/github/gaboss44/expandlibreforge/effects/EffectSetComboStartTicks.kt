@@ -1,6 +1,6 @@
 package com.github.gaboss44.expandlibreforge.effects
 
-import com.github.gaboss44.expandlibreforge.events.combo.PlayerComboStartEvent
+import com.github.gaboss44.expandlibreforge.events.combo.ComboStartEvent
 import com.willfp.eco.core.config.interfaces.Config
 import com.willfp.libreforge.NoCompileData
 import com.willfp.libreforge.arguments
@@ -19,7 +19,7 @@ object EffectSetComboStartTicks : Effect<NoCompileData>("set_combo_start_ticks")
     }
 
     override fun onTrigger(config: Config, data: TriggerData, compileData: NoCompileData): Boolean {
-        val event = data.event as? PlayerComboStartEvent ?: return false
+        val event = data.event as? ComboStartEvent ?: return false
         val value = config.getIntFromExpression("value", data)
         event.startTicks = value
         return true

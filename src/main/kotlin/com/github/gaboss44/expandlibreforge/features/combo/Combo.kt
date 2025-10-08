@@ -14,4 +14,5 @@ data class Combo(
     val phase: ComboPhase
 ) {
     val player get() = Bukkit.getPlayer(playerId)
+    val completedTicks get() = maximumTicks - remainingTicks
 }

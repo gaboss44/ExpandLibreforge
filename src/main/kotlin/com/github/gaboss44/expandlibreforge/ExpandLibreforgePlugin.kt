@@ -32,6 +32,7 @@ class ExpandLibreforgePlugin : LibreforgePlugin() {
     override fun handleEnable() {
 
         Effects.register(EffectPlaySoundKey)
+        Effects.register(EffectPlaySoundKeyToWorld)
 
         Effects.register(EffectSetGravity)
         Effects.register(EffectSetSilent)
@@ -180,6 +181,7 @@ class ExpandLibreforgePlugin : LibreforgePlugin() {
         ComboPlaceholder.createRemainingTicks(this).register()
         ComboPlaceholder.createInitialTicks(this).register()
         ComboPlaceholder.createMaximumTicks(this).register()
+        ComboPlaceholder.createCompletedTicks(this).register()
     }
 
     override fun loadListeners(): List<Listener> {

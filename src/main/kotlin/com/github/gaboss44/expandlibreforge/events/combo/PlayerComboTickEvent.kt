@@ -1,9 +1,7 @@
 package com.github.gaboss44.expandlibreforge.events.combo
 
-import com.github.gaboss44.expandlibreforge.events.Parental
 import com.github.gaboss44.expandlibreforge.features.combo.Combo
 import org.bukkit.entity.Player
-import org.bukkit.event.Cancellable
 import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
@@ -12,14 +10,8 @@ class PlayerComboTickEvent(
     player: Player,
     combo: Combo,
     shouldUpdateEffects: Boolean = false,
-    updateTicks: Int
-) : PlayerComboEvent(player, combo, shouldUpdateEffects), Cancellable, Parental {
-
-    private var ticks: Int = updateTicks
-
-    var updateTicks: Int
-        get() = ticks
-        set(value) { ticks = value }
+    override var updateTicks: Int
+) : PlayerComboEvent(player, combo, shouldUpdateEffects), ComboTickEvent {
 
     private var cancelled: Boolean = false
 
