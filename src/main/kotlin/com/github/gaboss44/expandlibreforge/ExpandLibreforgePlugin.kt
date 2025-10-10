@@ -62,6 +62,10 @@ class ExpandLibreforgePlugin : LibreforgePlugin() {
 
         Effects.register(EffectPutDamageMultiplier)
 
+        Effects.register(EffectSetDamageTakenByItem)
+        Effects.register(EffectRejectDamageTakenByItemUsingPoisson)
+        Effects.register(EffectRejectDamageTakenByItemDiscreetly)
+
         Triggers.register(TriggerRiptide)
         Triggers.register(TriggerInteract(this))
         Triggers.register(TriggerInventoryInteract)
@@ -113,6 +117,8 @@ class ExpandLibreforgePlugin : LibreforgePlugin() {
         Filters.register(FilterIsSprinting)
         Filters.register(FilterIsSneaking)
         Filters.register(FilterIsBlocking)
+        Filters.register(FilterLocationOnGround)
+        Filters.register(FilterEntityOnGround)
 
         Filters.register(FilterVictimIsPresent)
         Filters.register(FilterMatchEntitiesIfPresent)
@@ -155,6 +161,11 @@ class ExpandLibreforgePlugin : LibreforgePlugin() {
 
         Filters.register(FilterVictimIsHumanEntity)
         Filters.register(FilterVictimIsPlayer)
+
+        FilterDamageTakenByItem.registerAllInto(Filters)
+        FilterOriginalDamageTakenByItem.registerAllInto(Filters)
+
+        Filters.register(FilterDamagedItem)
 
         if (Prerequisite.HAS_1_20_5.isMet) {
             Filters.register(FilterDamageType)

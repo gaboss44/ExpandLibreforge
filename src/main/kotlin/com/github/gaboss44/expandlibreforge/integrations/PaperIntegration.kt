@@ -57,6 +57,7 @@ object PaperIntegration : LoadableIntegration {
         Filters.register(FilterBeaconEffect)
 
         Filters.register(FilterCritical)
+        Filters.register(FilterSprintingOrCritical)
 
         FilterPlayerCooledAttackStrength.registerAllInto(Filters)
         FilterVictimCooledAttackStrength.registerAllInto(Filters)
