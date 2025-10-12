@@ -10,9 +10,7 @@ import org.bukkit.entity.Player
 
 object EffectResetCurrentCooldownPeriod : Effect<NoCompileData>("reset_current_cooldown_period") {
     override val parameters = setOf(
-        TriggerParameter.PLAYER,
-        TriggerParameter.VICTIM,
-        TriggerParameter.PROJECTILE
+        TriggerParameter.EVENT
     )
 
     override fun onTrigger(config: Config, data: TriggerData, compileData: NoCompileData): Boolean {

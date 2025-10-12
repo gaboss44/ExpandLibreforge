@@ -23,7 +23,7 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
-    compileOnly("com.willfp:eco:6.76.3")
+    compileOnly("com.willfp:eco:6.77.0")
     compileOnly("org.jetbrains:annotations:23.0.0")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
     compileOnly("de.tr7zw:item-nbt-api:2.12.3")

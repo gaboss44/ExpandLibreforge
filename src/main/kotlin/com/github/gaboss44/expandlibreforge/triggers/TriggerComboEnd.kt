@@ -12,6 +12,7 @@ import org.bukkit.event.EventPriority
 sealed class TriggerComboEnd(id: String) : Trigger(id) {
     override val parameters = setOf(
         TriggerParameter.PLAYER,
+        TriggerParameter.LOCATION,
         TriggerParameter.EVENT,
         TriggerParameter.VALUE,
         TriggerParameter.ALT_VALUE
@@ -23,6 +24,7 @@ sealed class TriggerComboEnd(id: String) : Trigger(id) {
             player.toDispatcher(),
             TriggerData(
                 player = player,
+                location = player.location,
                 event = event,
                 value = event.combo.count.toDouble(),
                 altValue = event.combo.score,
