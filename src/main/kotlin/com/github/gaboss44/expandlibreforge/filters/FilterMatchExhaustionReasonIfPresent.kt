@@ -1,0 +1,20 @@
+package com.github.gaboss44.expandlibreforge.filters
+
+import com.willfp.eco.core.config.interfaces.Config
+import com.willfp.eco.util.containsIgnoreCase
+import com.willfp.libreforge.NoCompileData
+import com.willfp.libreforge.filters.Filter
+import com.willfp.libreforge.getFormattedStrings
+import com.willfp.libreforge.triggers.TriggerData
+import org.bukkit.event.entity.EntityExhaustionEvent
+
+object FilterMatchExhaustionReasonIfPresent : Filter<NoCompileData, Collection<String>>("match_exhaustion_reason_if_present") {
+    override fun getValue(config: Config, data: TriggerData?, key: String): Collection<String> {
+        return config.getFormattedStrings(key, data)
+    }
+
+    override fun isMet(data: TriggerData, value: Collection<String>, compileData: NoCompileData): Boolean {
+        val event = data.event as? EntityExhaustionEvent ?: return true
+        return value.containsIgnoreCase(event.exhaustionReason.name)
+    }
+}
