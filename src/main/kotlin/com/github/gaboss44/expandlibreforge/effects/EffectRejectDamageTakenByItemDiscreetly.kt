@@ -90,7 +90,7 @@ object EffectRejectDamageTakenByItemDiscreetly :
         var totalRejected = 0
 
         repeat (fullIterations) {
-            val r = NumberUtils.randInt(0, bound) + 1
+            val r = NumberUtils.randInt(0, bound) + 1 // 1 to bound
             if (r >= threshold) {
                 totalRejected += step
                 if (totalRejected >= maxRejection) return@repeat
@@ -99,7 +99,7 @@ object EffectRejectDamageTakenByItemDiscreetly :
 
         // residual step if allowed
         if (applyResidual && totalRejected < maxRejection && residual > 0) {
-            val r = NumberUtils.randInt(0, bound)
+            val r = NumberUtils.randInt(0, bound) + 1 // 1 to bound
             if (r >= threshold) {
                 totalRejected += residual
             }
