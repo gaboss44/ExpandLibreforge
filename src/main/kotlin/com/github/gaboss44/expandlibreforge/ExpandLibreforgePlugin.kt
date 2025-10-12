@@ -66,6 +66,9 @@ class ExpandLibreforgePlugin : LibreforgePlugin() {
         Effects.register(EffectRejectDamageTakenByItemUsingPoisson)
         Effects.register(EffectRejectDamageTakenByItemDiscreetly)
 
+        Effects.register(EffectArmorMultiplier)
+        Effects.register(EffectArmorToughnessMultiplier)
+
         Triggers.register(TriggerRiptide)
         Triggers.register(TriggerInteract(this))
         Triggers.register(TriggerInventoryInteract)
