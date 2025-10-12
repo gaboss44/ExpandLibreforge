@@ -167,10 +167,8 @@ class ExpandLibreforgePlugin : LibreforgePlugin() {
 
         Filters.register(FilterDamagedItem)
 
-        if (Prerequisite.HAS_1_20_5.isMet) {
-            Filters.register(FilterDamageType)
-            Filters.register(FilterDamageSourceIsIndirect)
-        }
+        Filters.register(FilterDamageType)
+        Filters.register(FilterDamageSourceIsIndirect)
 
         if (Prerequisite.HAS_PAPER.isMet) {
             PaperIntegration.load(this)
