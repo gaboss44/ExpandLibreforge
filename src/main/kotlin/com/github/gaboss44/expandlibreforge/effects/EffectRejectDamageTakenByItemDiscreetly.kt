@@ -46,6 +46,20 @@ object EffectRejectDamageTakenByItemDiscreetly :
         val itemDamageStr = item.durability.toString()
         val itemMaxDamageStr = item.type.maxDurability.toString()
 
+        val maxRejection = if (config.has("max_rejection")) {
+            config.exprInt("max_rejection",
+                "%damage%" to damageStr,
+                "%item_damage%" to itemDamageStr,
+                "%item_max_damage%" to itemMaxDamageStr,
+                "%d%" to damageStr,
+                "%itd%" to itemDamageStr,
+                "%imd%" to itemMaxDamageStr).coerceAtMost(damage)
+        } else {
+            damage
+        }
+
+        if (maxRejection < 1) return true
+
         val step = config.exprInt("step",
             "%damage%" to damageStr,
             "%item_damage%" to itemDamageStr,
@@ -70,19 +84,18 @@ object EffectRejectDamageTakenByItemDiscreetly :
             "%itd%" to itemDamageStr,
             "%imd%" to itemMaxDamageStr)
 
-        val applyResidual = config.getBool("apply_residual_step")
-
-        val maxRejection = if (config.has("max_rejection")) {
-            config.exprInt("max_rejection",
-                "%damage%" to damageStr,
-                "%item_damage%" to itemDamageStr,
-                "%item_max_damage%" to itemMaxDamageStr,
-                "%d%" to damageStr,
-                "%itd%" to itemDamageStr,
-                "%imd%" to itemMaxDamageStr).coerceIn(0, damage)
-        } else {
-            damage
+        // if 'r' is always 1
+        if (bound <= 1) {
+            // if r >= threshold is always true, then reject all at once.
+            if (threshold <= 1) {
+                event.damage = (damage - maxRejection).coerceAtLeast(0)
+            }
+            // if not, do not reject at all.
+            // either way, return.
+            return true
         }
+
+        val applyResidual = config.getBool("apply_residual_step")
 
         val fullIterations = damage / step
         val residual = damage % step
