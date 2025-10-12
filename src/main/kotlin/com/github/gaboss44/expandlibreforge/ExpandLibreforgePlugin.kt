@@ -69,6 +69,8 @@ class ExpandLibreforgePlugin : LibreforgePlugin() {
         Effects.register(EffectArmorMultiplier)
         Effects.register(EffectArmorToughnessMultiplier)
 
+        Effects.register(EffectSetExhaustion)
+
         Triggers.register(TriggerRiptide)
         Triggers.register(TriggerInteract(this))
         Triggers.register(TriggerInventoryInteract)
@@ -92,6 +94,8 @@ class ExpandLibreforgePlugin : LibreforgePlugin() {
 
         TriggerProjectileHits.registerAllInto(Triggers)
         TriggerHitByProjectile.registerAllInto(Triggers)
+
+        TriggerExhaustion.registerAllInto(Triggers)
 
         Mutators.register(MutatorAttackDamageAsValue)
         Mutators.register(MutatorAttackDamageAsAltValue)
@@ -172,6 +176,10 @@ class ExpandLibreforgePlugin : LibreforgePlugin() {
 
         Filters.register(FilterDamageType)
         Filters.register(FilterDamageSourceIsIndirect)
+
+        Filters.register(FilterMatchExhaustionReasonIfPresent)
+        Filters.register(FilterIgnoreExhaustionReasonIfPresent)
+        FilterExhaustion.registerAllInto(Filters)
 
         if (Prerequisite.HAS_PAPER.isMet) {
             PaperIntegration.load(this)
