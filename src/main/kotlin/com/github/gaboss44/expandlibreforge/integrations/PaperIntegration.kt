@@ -81,6 +81,10 @@ object PaperIntegration : LoadableIntegration {
 
         FilterPlayerCurrentCooldownPeriod.registerAllInto(Filters)
         FilterVictimCurrentCooldownPeriod.registerAllInto(Filters)
+
+        if (ClassUtils.exists("io.papermc.paper.event.entity.EntityAttemptSmashAttackEvent")) {
+            TriggerSmashAttempt.registerAllInto(Triggers)
+        }
     }
 
     override fun getPluginName() = "Paper"

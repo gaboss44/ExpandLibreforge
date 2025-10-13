@@ -71,6 +71,11 @@ class ExpandLibreforgePlugin : LibreforgePlugin() {
 
         Effects.register(EffectSetExhaustion)
 
+        Effects.register(EffectSetConsumedItem)
+        Effects.register(EffectSetConsumeReplacement)
+
+        Effects.register(EffectRepeatAttackFromDamageEvent)
+
         Triggers.register(TriggerRiptide)
         Triggers.register(TriggerInteract(this))
         Triggers.register(TriggerInventoryInteract)
@@ -80,7 +85,6 @@ class ExpandLibreforgePlugin : LibreforgePlugin() {
         TriggerXpChange.registerAllInto(Triggers)
 
         TriggerTakeDamage.registerAllInto(Triggers)
-
         TriggerInflictDamage.registerAllInto(Triggers)
 
         TriggerComboStart.registerAllInto(Triggers)
@@ -180,6 +184,9 @@ class ExpandLibreforgePlugin : LibreforgePlugin() {
         Filters.register(FilterMatchExhaustionReasonIfPresent)
         Filters.register(FilterIgnoreExhaustionReasonIfPresent)
         FilterExhaustion.registerAllInto(Filters)
+
+        Filters.register(FilterMatchConsumeReplacementIfPresent)
+        Filters.register(FilterIgnoreConsumeReplacementIfPresent)
 
         if (Prerequisite.HAS_PAPER.isMet) {
             PaperIntegration.load(this)
