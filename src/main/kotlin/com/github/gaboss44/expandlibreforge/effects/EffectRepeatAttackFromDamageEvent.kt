@@ -6,10 +6,14 @@ import com.willfp.libreforge.NoCompileData
 import com.willfp.libreforge.effects.Effect
 import com.willfp.libreforge.toPlaceholderContext
 import com.willfp.libreforge.triggers.TriggerData
+import com.willfp.libreforge.triggers.TriggerParameter
 import org.bukkit.entity.Damageable
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 
 object EffectRepeatAttackFromDamageEvent : Effect<NoCompileData>("repeat_attack_from_damage_event") {
+    override val parameters = setOf(
+        TriggerParameter.EVENT
+    )
 
     override fun onTrigger(config: Config, data: TriggerData, compileData: NoCompileData): Boolean {
         val event = data.event as? EntityDamageByEntityEvent ?: return false
