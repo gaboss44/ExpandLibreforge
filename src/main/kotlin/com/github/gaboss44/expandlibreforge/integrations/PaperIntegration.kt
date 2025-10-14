@@ -13,6 +13,7 @@ import com.willfp.libreforge.triggers.Triggers
 import org.bukkit.entity.Entity
 import org.bukkit.entity.HumanEntity
 import org.bukkit.entity.LivingEntity
+import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
 object PaperIntegration : LoadableIntegration {
@@ -100,6 +101,37 @@ object PaperIntegration : LoadableIntegration {
                 Entity::class.java,
                 Boolean::class.javaPrimitiveType!!)) {
             Effects.register(EffectAttackVictimWithOffhand)
+        }
+
+        if (MethodUtils.hasMethod(
+                Player::class.java,
+                "canInteractWithEntity",
+                Entity::class.java,
+                Double::class.javaPrimitiveType!!)) {
+            Filters.register(FilterEntityInteractivity)
+        }
+
+        if (MethodUtils.hasMethod(
+                Player::class.java,
+                "setAttackStrengthTicker",
+                Int::class.javaPrimitiveType!!)) {
+            Effects.register(EffectSetAttackStrengthTicker)
+        }
+
+        if (MethodUtils.hasMethod(
+                Player::class.java,
+                "getAttackStrengthTicker")) {
+            FilterAttackStrengthTicker.registerAllInto(Filters)
+            FilterVictimAttackStrengthTicker.registerAllInto(Filters)
+        }
+
+        if (ClassUtils.exists("io.papermc.paper.event.entity.EntityCanSmashAttackCheckEvent")) {
+            TriggerSmashCheck.registerAllInto(Triggers)
+
+            Filters.register(FilterMatchSmashCheckReasonIfPresent)
+            Filters.register(FilterMatchSmashCheckResultIfPresent)
+            Filters.register(FilterIgnoreSmashCheckReasonIfPresent)
+            Filters.register(FilterIgnoreSmashCheckResultIfPresent)
         }
     }
 
