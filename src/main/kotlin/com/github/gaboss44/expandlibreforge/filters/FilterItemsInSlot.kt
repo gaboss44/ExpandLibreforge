@@ -28,6 +28,6 @@ object FilterItemsInSlot : Filter<Pair<Collection<TestableItem>, List<SlotType>>
     override fun makeCompileData(
         config: Config, context: ViolationContext, values: Config
     ): Pair<Collection<TestableItem>, List<SlotType>> {
-        return config.getStrings("items", "item").map { Items.lookup(it) }.filterNot { item -> item is EmptyTestableItem } to config.getStrings("slots", "slot").mapNotNull { SlotTypes[it] }
+        return values.getStrings("items", "item").map { Items.lookup(it) }.filterNot { item -> item is EmptyTestableItem } to values.getStrings("slots", "slot").mapNotNull { SlotTypes[it] }
     }
 }
