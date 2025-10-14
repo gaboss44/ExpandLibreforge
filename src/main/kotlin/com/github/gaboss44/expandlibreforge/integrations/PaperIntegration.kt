@@ -128,10 +128,25 @@ object PaperIntegration : LoadableIntegration {
         if (ClassUtils.exists("io.papermc.paper.event.entity.EntityCanSmashAttackCheckEvent")) {
             TriggerSmashCheck.registerAllInto(Triggers)
 
+            Effects.register(EffectSetSmashCheckResult)
+
             Filters.register(FilterMatchSmashCheckReasonIfPresent)
             Filters.register(FilterMatchSmashCheckResultIfPresent)
             Filters.register(FilterIgnoreSmashCheckReasonIfPresent)
             Filters.register(FilterIgnoreSmashCheckResultIfPresent)
+
+            Filters.register(FilterSmashCheckIsOriginallySuccessful)
+        }
+
+        if (ClassUtils.exists("io.papermc.paper.event.entity.EntitySmashAttackFallDistanceEvent")) {
+            TriggerSmashFallDistance.registerAllInto(Triggers)
+
+            Effects.register(EffectSetSmashFallDistance)
+
+            Filters.register(FilterMatchSmashFallDistanceReasonIfPresent)
+            Filters.register(FilterIgnoreSmashFallDistanceReasonIfPresent)
+
+            FilterSmashFallDistance.registerAllInto(Filters)
         }
     }
 
