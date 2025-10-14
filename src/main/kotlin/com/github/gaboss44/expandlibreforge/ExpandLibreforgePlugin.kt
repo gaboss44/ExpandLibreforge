@@ -78,6 +78,9 @@ class ExpandLibreforgePlugin : LibreforgePlugin() {
 
         Effects.register(EffectAttackVictim)
 
+        Effects.register(EffectSwingMainHand)
+        Effects.register(EffectSwingOffHand)
+
         Triggers.register(TriggerRiptide)
         Triggers.register(TriggerInteract(this))
         Triggers.register(TriggerInventoryInteract)
