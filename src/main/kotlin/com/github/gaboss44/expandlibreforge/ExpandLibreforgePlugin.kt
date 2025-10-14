@@ -200,6 +200,9 @@ class ExpandLibreforgePlugin : LibreforgePlugin() {
 
         Filters.register(FilterItemsInSlot)
 
+        Filters.register(FilterMatchComboPhaseIfPresent)
+        Filters.register(FilterIgnoreComboPhaseIfPresent)
+
         if (Prerequisite.HAS_PAPER.isMet) {
             PaperIntegration.load(this)
         }
