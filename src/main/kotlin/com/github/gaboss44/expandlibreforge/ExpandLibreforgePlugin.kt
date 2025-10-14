@@ -4,6 +4,7 @@ import com.github.gaboss44.expandlibreforge.conditions.ConditionHasCombo
 import com.github.gaboss44.expandlibreforge.conditions.ConditionPlayerCurrentInput
 import com.github.gaboss44.expandlibreforge.effects.*
 import com.github.gaboss44.expandlibreforge.features.combo.ComboPlaceholder
+import com.github.gaboss44.expandlibreforge.features.placeholder.ExpandLibreforgePlaceholder
 import com.github.gaboss44.expandlibreforge.filters.*
 import com.github.gaboss44.expandlibreforge.triggers.*
 import com.github.gaboss44.expandlibreforge.mutators.*
@@ -224,6 +225,8 @@ class ExpandLibreforgePlugin : LibreforgePlugin() {
         ComboPlaceholder.createInitialTicks(this).register()
         ComboPlaceholder.createMaximumTicks(this).register()
         ComboPlaceholder.createCompletedTicks(this).register()
+
+        ExpandLibreforgePlaceholder.createFallDistance(this).register()
     }
 
     override fun loadListeners(): List<Listener> {
