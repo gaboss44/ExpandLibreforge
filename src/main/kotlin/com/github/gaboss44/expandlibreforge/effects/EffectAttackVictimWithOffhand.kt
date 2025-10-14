@@ -6,7 +6,7 @@ import com.willfp.libreforge.effects.Effect
 import com.willfp.libreforge.triggers.TriggerData
 import com.willfp.libreforge.triggers.TriggerParameter
 
-object EffectAttackVictim : Effect<NoCompileData>("attack_victim") {
+object EffectAttackVictimWithOffhand : Effect<NoCompileData>("attack_victim_with_offhand") {
     override val parameters = setOf(
         TriggerParameter.PLAYER,
         TriggerParameter.VICTIM
@@ -15,7 +15,7 @@ object EffectAttackVictim : Effect<NoCompileData>("attack_victim") {
     override fun onTrigger(config: Config, data: TriggerData, compileData: NoCompileData): Boolean {
         val player = data.player ?: return false
         val victim = data.victim ?: return false
-        player.attack(victim, config.getBool("offhand"))
+        player.attack(victim, true)
         return true
     }
 }

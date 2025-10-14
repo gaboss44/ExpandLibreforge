@@ -10,6 +10,7 @@ import com.willfp.libreforge.effects.Effects
 import com.willfp.libreforge.filters.Filters
 import com.willfp.libreforge.integrations.LoadableIntegration
 import com.willfp.libreforge.triggers.Triggers
+import org.bukkit.entity.Entity
 import org.bukkit.entity.HumanEntity
 import org.bukkit.entity.LivingEntity
 import org.bukkit.inventory.ItemStack
@@ -96,9 +97,9 @@ object PaperIntegration : LoadableIntegration {
         if (MethodUtils.hasMethod(
                 LivingEntity::class.java,
                 "attack",
-                LivingEntity::class.java,
+                Entity::class.java,
                 Boolean::class.javaPrimitiveType!!)) {
-            Effects.register(EffectAttackVictim)
+            Effects.register(EffectAttackVictimWithOffhand)
         }
     }
 
