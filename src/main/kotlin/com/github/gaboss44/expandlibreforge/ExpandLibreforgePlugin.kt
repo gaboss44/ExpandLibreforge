@@ -193,6 +193,13 @@ class ExpandLibreforgePlugin : LibreforgePlugin() {
         Filters.register(FilterMatchConsumeReplacementIfPresent)
         Filters.register(FilterIgnoreConsumeReplacementIfPresent)
 
+        FilterFallDistance.registerAllInto(Filters)
+        FilterVictimFallDistance.registerAllInto(Filters)
+
+        Filters.register(FilterPlayerSameAsVictim)
+
+        Filters.register(FilterItemsInSlot)
+
         if (Prerequisite.HAS_PAPER.isMet) {
             PaperIntegration.load(this)
         }
