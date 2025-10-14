@@ -4,8 +4,9 @@ import com.github.gaboss44.expandlibreforge.util.EntityTarget
 import com.willfp.eco.core.config.interfaces.Config
 import com.willfp.eco.core.items.Items
 import com.willfp.eco.core.items.TestableItem
-import com.willfp.eco.core.items.matches
+import com.willfp.eco.core.recipe.parts.EmptyTestableItem
 import com.willfp.libreforge.ViolationContext
+import com.willfp.libreforge.filterNotEmpty
 import com.willfp.libreforge.filters.Filter
 import com.willfp.libreforge.getStrings
 import com.willfp.libreforge.slot.SlotType
@@ -21,12 +22,12 @@ object FilterItemsInSlot : Filter<Pair<Collection<TestableItem>, List<SlotType>>
     override fun isMet(data: TriggerData, value: Config, compileData: Pair<Collection<TestableItem>, List<SlotType>>): Boolean {
         val entity = EntityTarget[value.getString("entity")]?.getEntity(data) as? LivingEntity ?: data.player ?: return true
 
-        return compileData.second.any { compileData.first.matches(it.getItems(entity)) }
+        return compileData.second.any { slot -> slot.getItems(entity).filterNotEmpty().any { compileData.first.any { test -> test.matches(it) } } }
     }
 
     override fun makeCompileData(
         config: Config, context: ViolationContext, values: Config
     ): Pair<Collection<TestableItem>, List<SlotType>> {
-        return config.getStrings("items", "item").map { Items.lookup(it) } to config.getStrings("slots", "slot").mapNotNull { SlotTypes[it] }
+        return config.getStrings("items", "item").map { Items.lookup(it) }.filterNot { item -> item is EmptyTestableItem } to config.getStrings("slots", "slot").mapNotNull { SlotTypes[it] }
     }
 }
