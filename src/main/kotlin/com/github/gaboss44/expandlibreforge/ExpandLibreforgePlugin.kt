@@ -76,6 +76,8 @@ class ExpandLibreforgePlugin : LibreforgePlugin() {
 
         Effects.register(EffectRepeatAttackFromDamageEvent)
 
+        Effects.register(EffectAttackVictim)
+
         Triggers.register(TriggerRiptide)
         Triggers.register(TriggerInteract(this))
         Triggers.register(TriggerInventoryInteract)
