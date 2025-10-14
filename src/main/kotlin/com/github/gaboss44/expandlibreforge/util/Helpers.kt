@@ -12,6 +12,7 @@ import org.bukkit.SoundCategory
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.entity.Projectile
+import org.bukkit.event.Event
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
 
@@ -168,4 +169,11 @@ fun getSoundCategoryOrElse(string: String?, default: SoundCategory): SoundCatego
     } catch (_: IllegalArgumentException) {
         default
     }
+}
+
+fun getEventResult(string: String?): Event.Result? {
+    if (string == null) return null
+    return try {
+        Event.Result.valueOf(string.uppercase())
+    } catch (_: IllegalArgumentException) { null }
 }

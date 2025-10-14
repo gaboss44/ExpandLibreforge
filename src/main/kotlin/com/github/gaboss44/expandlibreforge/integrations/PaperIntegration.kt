@@ -67,6 +67,12 @@ object PaperIntegration : LoadableIntegration {
 
         if (ClassUtils.exists("io.papermc.paper.event.entity.EntityAttemptSmashAttackEvent")) {
             TriggerSmashAttempt.registerAllInto(Triggers)
+
+            Effects.register(EffectSetSmashAttemptResult)
+
+            Filters.register(FilterSmashAttemptIsOriginallySuccessful)
+            Filters.register(FilterMatchSmashAttemptResultIfPresent)
+            Filters.register(FilterIgnoreSmashAttemptResultIfPresent)
         }
     }
 
