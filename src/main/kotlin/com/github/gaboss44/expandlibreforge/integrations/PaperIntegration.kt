@@ -148,6 +148,27 @@ object PaperIntegration : LoadableIntegration {
 
             FilterSmashFallDistance.registerAllInto(Filters)
         }
+
+        if (ClassUtils.exists("io.papermc.paper.event.entity.EntityEnchantedItemInUseEvent")) {
+            Filters.register(FilterMatchEnchantedItemInUseEquipmentSlotIfPresent)
+            Filters.register(FilterIgnoreEnchantedItemInUseEquipmentSlotIfPresent)
+            Filters.register(FilterMatchItemEnchantmentInUseIfPresent)
+            Filters.register(FilterIgnoreItemEnchantmentInUseIfPresent)
+        }
+
+        if (ClassUtils.exists("io.papermc.paper.event.entity.EntityEnchantedItemLocationChangedEffectsEvent")) {
+            TriggerEnchantedItemLocationChangedEffects.registerAllInto(Triggers)
+
+            Effects.register(EffectSetEnchantedItemLocationChangedEffectsOverrideLevel)
+            Effects.register(EffectSetEnchantedItemLocationChangedEffectsContextResult)
+        }
+
+        if (ClassUtils.exists("io.papermc.paper.event.entity.EntityEnchantedItemPostAttackEffectsEvent")) {
+            TriggerEnchantedItemPostAttackEffects.registerAllInto(Triggers)
+
+            Effects.register(EffectSetEnchantedItemPostAttackEffectsOverrideLevel)
+            Effects.register(EffectSetEnchantedItemPostAttackEffectsContextResult)
+        }
     }
 
     override fun getPluginName() = "Paper"
