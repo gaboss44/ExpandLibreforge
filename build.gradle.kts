@@ -4,7 +4,7 @@ plugins {
     java
     `java-library`
     kotlin("jvm") version "2.1.21"
-    id("com.gradleup.shadow") version "8.3.6"
+    id("com.gradleup.shadow") version "9.2.2" // "8.3.6"
     id("com.willfp.libreforge-gradle-plugin") version "1.0.3"
 }
 
