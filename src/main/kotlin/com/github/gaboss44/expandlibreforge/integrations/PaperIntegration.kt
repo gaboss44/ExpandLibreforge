@@ -95,6 +95,23 @@ object PaperIntegration : LoadableIntegration {
             Filters.register(FilterIgnoreSmashAttemptResultIfPresent)
         }
 
+        if (ClassUtils.exists("io.papermc.paper.event.entity.EntityDamageArmorAbsorbEvent")) {
+            TriggerArmorAbsorb.registerAllInto(Triggers)
+
+            Effects.register(EffectSetArmorAbsorb)
+
+            FilterAbsorbArmorPoints.registerAllInto(Filters)
+            FilterAbsorbArmorToughness.registerAllInto(Filters)
+        }
+
+        if (ClassUtils.exists("io.papermc.paper.event.entity.EntityDamageMagicAbsorbEvent")) {
+            TriggerMagicAbsorb.registerAllInto(Triggers)
+
+            Effects.register(EffectSetMagicAbsorb)
+
+            FilterAbsorbMagicProtection.registerAllInto(Filters)
+        }
+
         if (MethodUtils.hasMethod(
                 LivingEntity::class.java,
                 "attack",
@@ -168,6 +185,17 @@ object PaperIntegration : LoadableIntegration {
 
             Effects.register(EffectSetEnchantedItemPostAttackEffectsOverrideLevel)
             Effects.register(EffectSetEnchantedItemPostAttackEffectsContextResult)
+        }
+
+        if (MethodUtils.hasMethod(
+                HumanEntity::class.java,
+                "performRiptideAttack",
+                Float::class.javaPrimitiveType!!,
+                Int::class.javaPrimitiveType!!,
+                Float::class.javaPrimitiveType!!,
+                ItemStack::class.java,
+            )) {
+            Effects.register(EffectPerformRiptideAttack)
         }
     }
 

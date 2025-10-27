@@ -7,14 +7,19 @@ import com.willfp.eco.core.config.interfaces.Config
 import com.willfp.libreforge.getDoubleFromExpression
 import com.willfp.libreforge.getIntFromExpression
 import com.willfp.libreforge.triggers.TriggerData
+import io.papermc.paper.event.entity.EntityDamageArmorAbsorbEvent
+import io.papermc.paper.event.entity.EntityDamageMagicAbsorbEvent
+import io.papermc.paper.event.entity.EntityEnchantedItemEffectsWithDamageSourceEvent
 import io.papermc.paper.event.player.PlayerShieldDisableEvent
 import org.bukkit.SoundCategory
+import org.bukkit.damage.DamageSource
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.entity.Projectile
 import org.bukkit.event.Event
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
+import org.bukkit.event.entity.EntityDeathEvent
 
 const val floatHalfMaxValue = Float.MAX_VALUE / 2
 
@@ -179,3 +184,34 @@ fun getEventResult(string: String?): Event.Result? {
         Event.Result.valueOf(string.uppercase())
     } catch (_: IllegalArgumentException) { null }
 }
+
+val Event.damageSource : DamageSource?
+    get() {
+        return when (this) {
+            is EntityDamageArmorAbsorbEvent -> this.damageSource
+            is EntityDamageMagicAbsorbEvent -> this.damageSource
+            is EntityDamageByEntityEvent -> this.damageSource
+            is EntityDamageEvent -> this.damageSource
+            is EntityDeathEvent -> this.damageSource
+            is EntityEnchantedItemEffectsWithDamageSourceEvent -> this.damageSource
+            else -> {
+                try {
+                    val clazz = this::class.java
+                    val m = clazz.getMethod("getDamageSource")
+                    val res = m.invoke(this)
+                    if (res is DamageSource) {
+                        return res
+                    }
+                } catch (_: Exception) { }
+
+                try {
+                    val f = this::class.java.getDeclaredField("damageSource")
+                    f.isAccessible = true
+                    val res = f.get(this)
+                    if (res is DamageSource) return res
+                } catch (_: Exception) { }
+
+                return null
+            }
+        }
+    }
