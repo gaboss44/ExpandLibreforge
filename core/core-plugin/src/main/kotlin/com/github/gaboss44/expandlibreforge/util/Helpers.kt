@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage")
+
 package com.github.gaboss44.expandlibreforge.util
 
 import com.destroystokyo.paper.event.entity.EntityKnockbackByEntityEvent
@@ -15,6 +17,7 @@ import org.bukkit.entity.Projectile
 import org.bukkit.event.Event
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
+import java.util.function.BooleanSupplier
 
 fun EntityDamageByEntityEvent.tryDamagerAsPlayer(): Player? {
     return when (val damager = this.damager) {
@@ -176,4 +179,68 @@ fun getEventResult(string: String?): Event.Result? {
     return try {
         Event.Result.valueOf(string.uppercase())
     } catch (_: IllegalArgumentException) { null }
+}
+
+fun Event.Result.getBoolOrElse(supplier: BooleanSupplier) : Boolean {
+    return when (this) {
+        Event.Result.ALLOW -> true
+        Event.Result.DENY -> false
+        Event.Result.DEFAULT -> supplier.asBoolean
+    }
+}
+
+fun Event.Result.getBoolOrElse(default: Boolean) : Boolean {
+    return when (this) {
+        Event.Result.ALLOW -> true
+        Event.Result.DENY -> false
+        Event.Result.DEFAULT -> default
+    }
+}
+
+fun Double.scaledBy(vararg ranges: Pair<Number, Number>) = this.scaledBy(ranges.toList())
+
+fun Double.scaledBy(ranges: List<Pair<Number, Number>>): Double {
+    if (ranges.isEmpty()) return this
+
+    var accumulated = 0.0
+    var lastLimit = 0.0
+
+    for ((scale, limit) in ranges) {
+        val scaleValue = scale.toDouble()
+        val limitValue = limit.toDouble()
+        val segment = limitValue - lastLimit
+        if (this <= limitValue) {
+            return accumulated + scaleValue * (this - lastLimit)
+        }
+        accumulated += scaleValue * segment
+        lastLimit = limitValue
+    }
+
+    // When we're here, it means the value is larger than all limits
+    val (pastScale, pastLimit) = ranges.last()
+    return accumulated + pastScale.toDouble() * (this - pastLimit.toDouble())
+}
+
+fun Float.scaledBy(vararg ranges: Pair<Number, Number>) = this.scaledBy(ranges.toList())
+
+fun Float.scaledBy(ranges: List<Pair<Number, Number>>): Float {
+    if (ranges.isEmpty()) return this
+
+    var accumulated = 0f
+    var lastLimit = 0f
+
+    for ((scale, limit) in ranges) {
+        val scaleValue = scale.toFloat()
+        val limitValue = limit.toFloat()
+        val segment = limitValue - lastLimit
+        if (this <= limitValue) {
+            return accumulated + scaleValue * (this - lastLimit)
+        }
+        accumulated += scaleValue * segment
+        lastLimit = limitValue
+    }
+
+    // When we're here, it means the value is larger than all limits
+    val (pastScale, pastLimit) = ranges.last()
+    return accumulated + pastScale.toFloat() * (this - pastLimit.toFloat())
 }

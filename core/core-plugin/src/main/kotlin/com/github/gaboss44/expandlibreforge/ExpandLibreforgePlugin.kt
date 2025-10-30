@@ -1,19 +1,16 @@
 package com.github.gaboss44.expandlibreforge
 
-import com.github.gaboss44.expandlibreforge.conditions.ConditionHasCombo
-import com.github.gaboss44.expandlibreforge.conditions.ConditionPlayerCurrentInput
+import com.github.gaboss44.expandlibreforge.conditions.*
 import com.github.gaboss44.expandlibreforge.effects.*
+import com.github.gaboss44.expandlibreforge.extensions.*
 import com.github.gaboss44.expandlibreforge.features.combo.ComboPlaceholder
 import com.github.gaboss44.expandlibreforge.features.placeholder.ExpandLibreforgePlaceholder
 import com.github.gaboss44.expandlibreforge.filters.*
 import com.github.gaboss44.expandlibreforge.triggers.*
 import com.github.gaboss44.expandlibreforge.mutators.*
 import com.github.gaboss44.expandlibreforge.integrations.*
-import com.github.gaboss44.expandlibreforge.listeners.DamageListener
-import com.github.gaboss44.expandlibreforge.listeners.PlayerInputListener
-import com.github.gaboss44.expandlibreforge.listeners.PlayerJoinListener
-import com.github.gaboss44.expandlibreforge.listeners.PlayerQuitListener
-import com.github.gaboss44.expandlibreforge.listeners.ServerTickListener
+import com.github.gaboss44.expandlibreforge.listeners.*
+import com.github.gaboss44.expandlibreforge.proxies.*
 import com.willfp.eco.core.Prerequisite
 import com.willfp.eco.util.ClassUtils
 import com.willfp.libreforge.conditions.Conditions
@@ -31,6 +28,10 @@ class ExpandLibreforgePlugin : LibreforgePlugin() {
     }
 
     override fun handleEnable() {
+
+        EnchantmentExtensions.setProxyIfNeeded(getProxy(EnchantmentHelperProxy::class.java))
+        EntityExtensions.setProxyIfNeeded(getProxy(EntityAccessorProxy::class.java))
+        WorldExtensions.setProxyIfNeeded(getProxy(WorldAccessorProxy::class.java))
 
         Effects.register(EffectPlaySoundKey)
         Effects.register(EffectPlaySoundKeyToWorld)

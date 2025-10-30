@@ -6,7 +6,7 @@ import com.willfp.libreforge.filters.Filter
 import com.willfp.libreforge.triggers.TriggerData
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 
-object FilterCritical : Filter<NoCompileData, Boolean>("critical") {
+object FilterCritical : Filter<NoCompileData, Boolean>("toCritical") {
     override fun getValue(
         config: Config,
         data: TriggerData?,

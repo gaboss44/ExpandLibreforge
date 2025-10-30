@@ -4,3 +4,4 @@ environment:
 
 options:
   color: "&#DD55DA"
+  proxy-package: "com.github.gaboss44.expandlibreforge.proxy"

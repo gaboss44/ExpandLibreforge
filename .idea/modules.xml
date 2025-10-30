@@ -2,6 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/core-nms/ExpandLibreforge.core.core-nms.main.iml" filepath="$PROJECT_DIR$/.idea/modules/core/core-nms/ExpandLibreforge.core.core-nms.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/core-plugin/ExpandLibreforge.core.core-plugin.main.iml" filepath="$PROJECT_DIR$/.idea/modules/core/core-plugin/ExpandLibreforge.core.core-plugin.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/ExpandLibreforge.core.main.iml" filepath="$PROJECT_DIR$/.idea/modules/core/ExpandLibreforge.core.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/ExpandLibreforge.main.iml" filepath="$PROJECT_DIR$/.idea/modules/ExpandLibreforge.main.iml" />
     </modules>
   </component>
