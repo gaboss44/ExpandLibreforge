@@ -1,50 +1,185 @@
 package com.github.gaboss44.expandlibreforge.proxy.v1_21_4
 
 import com.github.gaboss44.expandlibreforge.proxies.EntityAccessorProxy
+import com.github.gaboss44.expandlibreforge.proxy.common.asNMSCopy
+import com.github.gaboss44.expandlibreforge.proxy.common.toNMS
+import io.papermc.paper.event.entity.EntityKnockbackEvent
+import net.minecraft.core.component.DataComponents
 import net.minecraft.core.registries.BuiltInRegistries.SOUND_EVENT
+import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket
 import net.minecraft.network.protocol.game.ClientboundSoundPacket
-import net.minecraft.sounds.SoundSource
+import net.minecraft.stats.Stats
 import net.minecraft.world.entity.ai.attributes.Attributes
 import org.bukkit.Sound
 import org.bukkit.SoundCategory
-import org.bukkit.craftbukkit.CraftSound
-import org.bukkit.craftbukkit.damage.CraftDamageSource
-import org.bukkit.craftbukkit.entity.CraftEntity
-import org.bukkit.craftbukkit.entity.CraftLivingEntity
-import org.bukkit.craftbukkit.entity.CraftPlayer
+import org.bukkit.World
 import org.bukkit.craftbukkit.event.CraftEventFactory
+import org.bukkit.craftbukkit.util.CraftVector
 import org.bukkit.damage.DamageSource
 import org.bukkit.entity.Entity
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent
+import org.bukkit.event.entity.EntityExhaustionEvent
 import org.bukkit.inventory.ItemStack
+import org.bukkit.util.Vector
 
+@Suppress("UnstableApiUsage")
 class EntityAccessor : EntityAccessorProxy {
 
     override fun getAttackDamage(entity: LivingEntity): Double {
-        val nmsEntity = (entity as CraftLivingEntity).handle!!
-        return nmsEntity.getAttributeValue(Attributes.ATTACK_DAMAGE)
+        return entity.toNMS().getAttributeValue(Attributes.ATTACK_DAMAGE)
     }
 
     override fun getSpeed(entity: LivingEntity): Double {
-        val nmsEntity = (entity as CraftLivingEntity).handle!!
-        return if (nmsEntity is net.minecraft.world.entity.player.Player) {
-            nmsEntity.getAttributeValue(Attributes.MOVEMENT_SPEED)
-        } else {
-            nmsEntity.speed.toDouble()
+        return entity.toNMS().let {
+            if (it is net.minecraft.world.entity.player.Player) {
+                it.getAttributeValue(Attributes.MOVEMENT_SPEED)
+            } else {
+                it.speed.toDouble()
+            }
         }
     }
 
+    override fun getAttackKnockback(entity: LivingEntity): Double {
+        return entity.toNMS().getAttributeValue(Attributes.ATTACK_KNOCKBACK)
+    }
+
+    override fun getKnockbackResistance(entity: LivingEntity): Double {
+        return entity.toNMS().getAttributeValue(Attributes.KNOCKBACK_RESISTANCE)
+    }
+
+    override fun getSweepDamageRatio(entity: LivingEntity): Double {
+        return entity.toNMS().getAttributeValue(Attributes.SWEEPING_DAMAGE_RATIO)
+    }
+
+    override fun hurtOrSimulate(
+        target: Entity,
+        source: DamageSource,
+        damage: Float
+    ): Boolean {
+        return target.toNMS().hurtOrSimulate(source.toNMS(), damage)
+    }
+
+    override fun hurtServer(
+        target: Entity,
+        world: World,
+        source: DamageSource,
+        damage: Float
+    ): Boolean {
+        return target.toNMS().hurtServer(world.toNMS(), source.toNMS(), damage)
+    }
+
+    override fun knockback(
+        target: LivingEntity,
+        strength: Double,
+        x: Double,
+        z: Double
+    ) {
+        target.toNMS().knockback(strength, x, z)
+    }
+
+    override fun knockback(
+        target: LivingEntity,
+        strength: Double,
+        x: Double,
+        z: Double,
+        attacker: Entity?,
+        paperCause: EntityKnockbackEvent.Cause
+    ) {
+        target.toNMS().knockback(strength, x, z, attacker?.toNMS(), paperCause)
+    }
+
+    override fun push(target: Entity, x: Double, y: Double, z: Double) {
+        target.toNMS().push(x, y, z)
+    }
+
+    override fun push(
+        target: Entity,
+        x: Double,
+        y: Double,
+        z: Double,
+        pusher: Entity?
+    ) {
+        target.toNMS().push(x, y, z, pusher?.toNMS())
+    }
+
+    override fun getOnPos(entity: Entity): Vector {
+        val pos = entity.toNMS().onPos
+        return CraftVector.toBukkit(pos)
+    }
+
+    override fun sendSweepAttackEffects(player: Player) {
+        player.toNMS().sweepAttack()
+    }
+
+    override fun sendCriticalHitEffects(player: Player, entity: Entity) {
+        player.toNMS().crit(entity.toNMS())
+    }
+
+    override fun sendMagicalHitEffects(player: Player, entity: Entity) {
+        player.toNMS().magicCrit(entity.toNMS())
+    }
+
+    override fun getLastHurtMob(entity: LivingEntity): Entity? {
+        val lastHurtMob = entity.toNMS().lastHurtMob ?: return null
+        return lastHurtMob.bukkitEntity
+    }
+
+    override fun setLastHurtMob(entity: LivingEntity, lastHurtMob: Entity) {
+        entity.toNMS().setLastHurtMob(lastHurtMob.toNMS())
+    }
+
+    override fun getLastHurtMobTimestamp(entity: LivingEntity): Int {
+        return entity.toNMS().lastHurtMobTimestamp
+    }
+
+    override fun getLastDamageCancelled(entity: Entity): Boolean {
+        return entity.toNMS().lastDamageCancelled
+    }
+
+    override fun setLastDamageCancelled(entity: Entity, cancelled: Boolean) {
+        entity.toNMS().lastDamageCancelled = cancelled
+    }
+
+    override fun getHurtMarked(entity: Entity): Boolean {
+        return entity.toNMS().hurtMarked
+    }
+
+    override fun setHurtMarked(entity: Entity, marked: Boolean) {
+        entity.toNMS().hurtMarked = marked
+    }
+
+    override fun sendMotionPacket(player: Player, entity: Entity) {
+        player.toNMS().connection.send(
+            ClientboundSetEntityMotionPacket(entity.toNMS())
+        )
+    }
+
+    override fun stopSleeping(entity: LivingEntity) {
+        entity.toNMS().stopSleeping()
+    }
+
+    override fun isInvulnerableToBase(
+        entity: Entity,
+        source: DamageSource
+    ): Boolean {
+        return entity.toNMS().isInvulnerableToBase(source.toNMS())
+    }
+
     override fun isAttackable(entity: Entity): Boolean {
-        return (entity as CraftEntity).handle!!.isAttackable
+        return entity.toNMS().isAttackable
+    }
+
+    override fun areAllies(entity1: Entity, entity2: Entity): Boolean {
+        return entity1.toNMS().isAlliedTo(entity2.toNMS())
     }
 
     override fun skipAttackInteraction(
         entity: Entity,
         attacker: Entity
     ): Boolean {
-        return (entity as CraftEntity).handle!!.skipAttackInteraction((attacker as CraftEntity).handle!!)
+        return entity.toNMS().skipAttackInteraction(attacker.toNMS())
     }
 
     private val autoSpinAttackItemStackField = net.minecraft.world.entity.LivingEntity::class.java.getDeclaredField("autoSpinAttackItemStack").apply {
@@ -52,9 +187,8 @@ class EntityAccessor : EntityAccessorProxy {
     }
 
     override fun getRiptideWeapon(entity: LivingEntity): ItemStack? {
-        val nmsEntity = (entity as CraftLivingEntity).handle!!
         return try {
-            val itemStack = autoSpinAttackItemStackField.get(nmsEntity) as net.minecraft.world.item.ItemStack?
+            val itemStack = autoSpinAttackItemStackField.get(entity.toNMS()) as net.minecraft.world.item.ItemStack?
             itemStack?.asBukkitMirror()
         } catch (_: Exception) {
             null
@@ -66,9 +200,8 @@ class EntityAccessor : EntityAccessorProxy {
     }
 
     override fun getRiptideDamage(entity: LivingEntity): Float {
-        val nmsEntity = (entity as CraftLivingEntity).handle!!
         return try {
-            autoSpinAttackDmgField.getFloat(nmsEntity)
+            autoSpinAttackDmgField.getFloat(entity.toNMS())
         } catch (_: Exception) {
             0f
         }
@@ -86,6 +219,26 @@ class EntityAccessor : EntityAccessorProxy {
         entity.lastDamageCause = event
     }
 
+    override fun getCurrentImpulseImpactPosition(player: Player): Vector? {
+        return CraftVector.toBukkit(player.toNMS().currentImpulseImpactPos)
+    }
+
+    override fun setCurrentImpulseImpactPosition(player: Player, position: Vector?) {
+        player.toNMS().currentImpulseImpactPos = CraftVector.toNMS(position)
+    }
+
+    override fun isIgnoringFallDamageFromCurrentImpulse(player: Player): Boolean {
+        return player.toNMS().isIgnoringFallDamageFromCurrentImpulse
+    }
+
+    override fun setIgnoreFallDamageFromCurrentImpulse(player: Player, ignore: Boolean) {
+        player.toNMS().setIgnoreFallDamageFromCurrentImpulse(ignore)
+    }
+
+    override fun setSpawnExtraParticlesOnFall(player: Player, spawn: Boolean) {
+        player.toNMS().setSpawnExtraParticlesOnFall(spawn)
+    }
+
     @Suppress("UnstableApiUsage")
     override fun handleRedirectableProjectile(
         attacker: LivingEntity,
@@ -93,18 +246,19 @@ class EntityAccessor : EntityAccessorProxy {
         source: DamageSource,
         damage: Float
     ): Boolean {
-        val nmsTarget = (target as CraftEntity).handle!!
-        val nmsAttacker = (attacker as CraftLivingEntity).handle!!
-        val nmsSource = (source as CraftDamageSource).handle
 
-        if (nmsTarget.type.`is`(net.minecraft.tags.EntityTypeTags.REDIRECTABLE_PROJECTILE) &&
-            nmsTarget is net.minecraft.world.entity.projectile.Projectile
+        val target = target.toNMS()
+        val attacker = attacker.toNMS()
+        val source = source.toNMS()
+
+        if (target.type.`is`(net.minecraft.tags.EntityTypeTags.REDIRECTABLE_PROJECTILE) &&
+            target is net.minecraft.world.entity.projectile.Projectile
         ) {
-            val projectile = nmsTarget
+            val projectile = target
 
             if (CraftEventFactory.handleNonLivingEntityDamageEvent(
-                    nmsTarget,
-                    nmsSource,
+                    target,
+                    source,
                     damage.toDouble(),
                     false
                 )
@@ -115,18 +269,18 @@ class EntityAccessor : EntityAccessorProxy {
             if (
                 projectile.deflect(
                     net.minecraft.world.entity.projectile.ProjectileDeflection.AIM_DEFLECT,
-                    nmsAttacker,
-                    nmsAttacker,
+                    attacker,
+                    attacker,
                     true
                 )
             ) {
-                nmsAttacker.level().playSound(
+                attacker.level().playSound(
                     null,
-                    nmsAttacker.x,
-                    nmsAttacker.y,
-                    nmsAttacker.z,
+                    attacker.x,
+                    attacker.y,
+                    attacker.z,
                     net.minecraft.sounds.SoundEvents.PLAYER_ATTACK_NODAMAGE,
-                    nmsAttacker.soundSource
+                    attacker.soundSource
                 )
                 return true
             }
@@ -145,11 +299,29 @@ class EntityAccessor : EntityAccessorProxy {
         volume: Float,
         pitch: Float
     ) {
-        val nmsPlayer = (fromEntity as CraftPlayer).handle!!
-        val nmsSound = CraftSound.bukkitToMinecraft(sound)!!
-        val nmsCategory = SoundSource.valueOf(category.name)
+        val player =  fromEntity.toNMS()
+        val sound = sound.toNMS()
+        val category = category.toNMS()
 
-        nmsPlayer.level().playSound(nmsPlayer, x, y, z, nmsSound, nmsCategory, volume, pitch)
-        nmsPlayer.connection.send(ClientboundSoundPacket(SOUND_EVENT.wrapAsHolder(nmsSound), nmsCategory, x, y, z, volume, pitch, nmsPlayer.random.nextLong()))
+        player.level().playSound(player, x, y, z, sound, category, volume, pitch)
+        player.connection.send(ClientboundSoundPacket(SOUND_EVENT.wrapAsHolder(sound), category, x, y, z, volume, pitch, player.random.nextLong()))
+    }
+
+    override fun awardDamageDealt(player: Player, amount: Int) {
+        player.toNMS().awardStat(Stats.DAMAGE_DEALT, amount)
+    }
+
+    override fun causeFoodExhaustion(
+        player: Player,
+        exhaustion: Float,
+        reason: EntityExhaustionEvent.ExhaustionReason?
+    ) {
+        player.toNMS().let {
+            if (reason != null) {
+                it.causeFoodExhaustion(exhaustion, reason)
+            } else {
+                it.causeFoodExhaustion(exhaustion)
+            }
+        }
     }
 }

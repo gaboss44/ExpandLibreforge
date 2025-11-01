@@ -14,7 +14,7 @@ class EntityCriticalCheckEvent(
     val weapon: ItemStack,
     val source: DamageSource,
     var criticalMultiplier: Float,
-    val areCritsDisabled: Boolean,
+    val critsDisabled: Boolean,
     val originalResult: Boolean
 ) : EntityEvent(attacker) {
 

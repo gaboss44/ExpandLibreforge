@@ -10,6 +10,8 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/core" />
             <option value="$PROJECT_DIR$/core/core-nms" />
+            <option value="$PROJECT_DIR$/core/core-nms/common" />
+            <option value="$PROJECT_DIR$/core/core-nms/v1_21_4" />
             <option value="$PROJECT_DIR$/core/core-plugin" />
           </set>
         </option>

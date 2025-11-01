@@ -6,8 +6,8 @@ import org.bukkit.event.HandlerList
 import org.bukkit.event.entity.EntityEvent
 
 open class EntityEnchantmentEffectsEvent(
-    val enchantmentUser: LivingEntity,
-    val enchantmentEffectsData: EnchantmentEffectsData
+    open val enchantmentUser: LivingEntity,
+    open val enchantmentEffectsData: EnchantmentEffectsData
 ) : EntityEvent(enchantmentUser) {
 
     override fun getEntity(): LivingEntity {

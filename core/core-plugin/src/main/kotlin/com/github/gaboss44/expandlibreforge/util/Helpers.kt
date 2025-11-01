@@ -17,6 +17,7 @@ import org.bukkit.entity.Projectile
 import org.bukkit.event.Event
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
+import org.bukkit.util.Vector
 import java.util.function.BooleanSupplier
 
 fun EntityDamageByEntityEvent.tryDamagerAsPlayer(): Player? {
@@ -243,4 +244,16 @@ fun Float.scaledBy(ranges: List<Pair<Number, Number>>): Float {
     // When we're here, it means the value is larger than all limits
     val (pastScale, pastLimit) = ranges.last()
     return accumulated + pastScale.toFloat() * (this - pastLimit.toFloat())
+}
+
+fun calculateViewVector(xRot: Float, yRot: Float, sin: (Float) -> Float, cos: (Float) -> Float): Vector {
+    val f = xRot * (Math.PI / 180.0).toFloat()
+    val f1 = -yRot * (Math.PI / 180.0).toFloat()
+
+    val cos = cos(f1)
+    val sin = sin(f1)
+    val cos1 = cos(f)
+    val sin1 = sin(f)
+
+    return Vector(sin * cos1, -sin1, cos * cos1)
 }

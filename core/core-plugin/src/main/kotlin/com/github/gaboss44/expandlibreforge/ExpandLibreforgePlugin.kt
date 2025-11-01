@@ -29,7 +29,11 @@ class ExpandLibreforgePlugin : LibreforgePlugin() {
 
     override fun handleEnable() {
 
-        EnchantmentExtensions.setProxyIfNeeded(getProxy(EnchantmentHelperProxy::class.java))
+        getProxy(CommonsInitializerProxy::class.java).init(this)
+        MinecraftMathFunctions.setProxyIfNeeded(getProxy(MinecraftMathProxy::class.java))
+        EnchantmentHelpers.setProxyIfNeeded(getProxy(EnchantmentHelperProxy::class.java))
+        DamageSourceExtensions.setProxyIfNeeded(getProxy(DamageSourceAccessorProxy::class.java))
+        ItemExtensions.setProxyIfNeeded(getProxy(ItemAccessorProxy::class.java))
         EntityExtensions.setProxyIfNeeded(getProxy(EntityAccessorProxy::class.java))
         WorldExtensions.setProxyIfNeeded(getProxy(WorldAccessorProxy::class.java))
 

@@ -16,7 +16,7 @@ class EntityEnchantmentFallBasedDamageEffectsEvent(
     val damage: Float,
     val overrideDamage: MutableFloat,
     val originalDamage: Float,
-    val weapon: ItemStack,
+    weapon: ItemStack,
     val source: DamageSource
 ) : EntityEnchantmentEffectsEvent(
     enchantmentUser,
@@ -59,6 +59,16 @@ class EntityEnchantmentFallBasedDamageEffectsEvent(
         weapon,
         source
     )
+
+    private var _weapon: ItemStack
+
+    var weapon: ItemStack
+        get() = _weapon.clone()
+        private set(value) { _weapon = value }
+
+    init {
+        this._weapon = weapon
+    }
 
     override fun getHandlers() = handlerList
 

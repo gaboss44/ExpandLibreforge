@@ -9,13 +9,13 @@ import org.bukkit.event.HandlerList
 import org.bukkit.inventory.ItemStack
 
 @Suppress("UnstableApiUsage")
-class EntityEnchantmentDamageEffectsEvent(
+class EntityEnchantmentKnockbackEffectsEvent(
     enchantmentUser: LivingEntity,
     enchantmentEffectsData: EnchantmentEffectsData,
     val target: Entity,
-    val damage: Float,
-    val overrideDamage: MutableFloat,
-    val originalDamage: Float,
+    val knockback: Float,
+    val overrideKnockback: MutableFloat,
+    val originalKnockback: Float,
     weapon: ItemStack,
     val source: DamageSource
 ) : EntityEnchantmentEffectsEvent(
@@ -26,17 +26,17 @@ class EntityEnchantmentDamageEffectsEvent(
         enchantmentUser: LivingEntity,
         enchantmentEffectsData: EnchantmentEffectsData,
         target: Entity,
-        damage: Float,
-        originalDamage: Float,
+        knockback: Float,
+        originalKnockback: Float,
         weapon: ItemStack,
         source: DamageSource
     ) : this(
         enchantmentUser,
         enchantmentEffectsData,
         target,
-        damage,
-        MutableFloat(damage),
-        originalDamage,
+        knockback,
+        MutableFloat(knockback),
+        originalKnockback,
         weapon,
         source
     )
@@ -45,17 +45,17 @@ class EntityEnchantmentDamageEffectsEvent(
         enchantmentUser: LivingEntity,
         enchantmentEffectsData: EnchantmentEffectsData,
         target: Entity,
-        overrideDamage: MutableFloat,
-        originalDamage: Float,
+        overrideKnockback: MutableFloat,
+        originalKnockback: Float,
         weapon: ItemStack,
         source: DamageSource
     ) : this(
         enchantmentUser,
         enchantmentEffectsData,
         target,
-        overrideDamage.value,
-        overrideDamage,
-        originalDamage,
+        overrideKnockback.value,
+        overrideKnockback,
+        originalKnockback,
         weapon,
         source
     )
