@@ -29,6 +29,7 @@ dependencies {
     implementation(project(":core:core-nms:v1_21_6", configuration = "reobf"))
     implementation(project(":core:core-nms:v1_21_7", configuration = "reobf"))
     implementation(project(":core:core-nms:v1_21_8", configuration = "reobf"))
+    implementation(project(":core:core-nms:v1_21_10", configuration = "reobf"))
 }
 
 allprojects {
@@ -49,7 +50,7 @@ allprojects {
 
     dependencies {
         //compileOnly("io.papermc.paper:paper-api:1.21.10-R0.1-SNAPSHOT")
-        compileOnly("com.willfp:eco:6.77.0")
+        compileOnly("com.willfp:eco:6.77.2")
         compileOnly("org.jetbrains:annotations:23.0.0")
         compileOnly("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
         compileOnly("de.tr7zw:item-nbt-api:2.12.3")
