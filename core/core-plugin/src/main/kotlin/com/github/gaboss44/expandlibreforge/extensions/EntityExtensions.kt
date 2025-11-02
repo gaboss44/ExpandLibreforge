@@ -38,6 +38,7 @@ import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.potion.PotionEffectType
 import org.bukkit.util.Vector
+import java.util.UUID
 import java.util.function.Consumer
 import java.util.function.Predicate
 import kotlin.math.roundToInt
@@ -53,7 +54,7 @@ object EntityExtensions {
     }
 }
 
-val LivingEntity.canCrit get() = this.fallDistance > 0.0 && !this.isOnGround && !this.isClimbing && !this.isInWater && !this.hasPotionEffect(PotionEffectType.BLINDNESS) && !this.isInsideVehicle && (this !is Player || this.isSprinting)
+val LivingEntity.canCrit get() = this.fallDistance > 0.0 && !this.isOnGround && !this.isClimbing && !this.isInWater && !this.hasPotionEffect(PotionEffectType.BLINDNESS) && !this.isInsideVehicle && !(this is Player && this.isSprinting)
 
 fun Player.sendSoundEffect(
     x: Double, y: Double, z: Double,
@@ -149,6 +150,14 @@ fun LivingEntity.applyKnockback(
     attacker: Entity?,
     paperCause: EntityKnockbackEvent.Cause
 ) { entityAccessor.knockback(this, strength, x, y, attacker, paperCause) }
+
+fun LivingEntity.applyKnockbackWithoutResistance(
+    strength: Double,
+    x: Double,
+    z: Double,
+    attacker: Entity?,
+    paperCause: EntityKnockbackEvent.Cause
+) { entityAccessor.knockbackWithoutResistance(this, strength, x, z, attacker, paperCause) }
 
 fun Entity.push(
     x: Double,
@@ -297,46 +306,33 @@ fun getSmashAttackKnockbackPredicate(attacker: Entity, target: Entity) = Predica
 val LivingEntity.nullableActiveItem: ItemStack? get() =
     if (this.activeItem.isEmpty) null else this.activeItem
 
-//fun LivingEntity.hurtInWorld(
-//    world: World,
-//    source: DamageSource,
-//    damage: Float
-//): Boolean {
-//    if (this.isInvulnerableToBase(source)) return false
-//
-//    val mutableInvulnerability = MutableBoolean(false)
-//    EnchantmentHelpers.mutateInvulnerabilityToDamage(mutableInvulnerability, world, this, source) {
-//        EntityEnchantmentDamageInvulnerabilityEffectsEvent(
-//            this, it, mutableInvulnerability, false, source
-//        ).callEvent()
-//    }
-//    if (mutableInvulnerability.isTrue) return false
-//
-//    if (this.isDead) return false
-//    if (DamageTypeTags.IS_FIRE.isTagged(source.damageType) && this.hasPotionEffect(PotionEffectType.FIRE_RESISTANCE)) return false
-//
-//    if (this.isSleeping) this.stopSleeping()
-//
-//    this.noActionTicks = 0
-//
-//    val damage = damage.coerceAtLeast(0.0f)
-//
-//    var blocksAttacks = false
-//    val directEntity = source.directEntity
-//    val piercing = if (directEntity is AbstractArrow) directEntity.pierceLevel else -1
-//    val bypassesShield = DamageTypeTags.BYPASSES_SHIELD.isTagged(source.damageType)
-//    val usingItem = this.nullableActiveItem
-//    val itemUseDuration = usingItem?.getMaxItemUseDuration(this) ?: 0
-//    val itemUseRemaining = this.itemUseRemainingTime
-//    val sourceLocation = source.damageLocation
-//
-//    val hasBlockingAngle = if (sourceLocation == null) false else {
-//        val vec3 = calculateViewVector(0.0f, yaw, ::sin, ::cos)
-//        val vec31 = this.location.toVector().subtract(sourceLocation.toVector()).setY(0.0).normalize()
-//
-//        vec31.dot(vec3) < 0.0
-//    }
-//}
+private val performingAttacks = mutableSetOf<UUID>()
+
+var Player.isPerformingAttack
+    get() = this.uniqueId in performingAttacks
+    private set(value) {
+        if (value) {
+            performingAttacks.add(this.uniqueId)
+        } else {
+            performingAttacks.remove(this.uniqueId)
+        }
+    }
+
+fun Player.performAttackSafely(
+    target: Entity,
+    damage: Float? = null,
+    slot: EquipmentSlot? = null,
+    source: DamageSource? = null
+) {
+    if (this.isPerformingAttack) return
+
+    try {
+        this.isPerformingAttack = true
+        this.performAttack(target, damage, slot, source)
+    } finally {
+        this.isPerformingAttack = false
+    }
+}
 
 /**
     Performs an attack from this player to the target entity.
@@ -430,16 +426,17 @@ fun Player.performAttack(
         Critical hit check
      */
     val critsDisabled = this.world.arePlayerCritsDisabled
-    var criticalAttack = strongAttack && this.canCrit && target is LivingEntity && !critsDisabled
+    val initialCriticalAttack = strongAttack && this.canCrit && target is LivingEntity && !critsDisabled
 
-    val criticalCheckEvent = EntityCriticalCheckEvent(this, target, weapon, source, 1.5f, critsDisabled, criticalAttack)
+    val mutableCriticalMultiplier = MutableFloat(1.5f)
+    val criticalCheckEvent = EntityCriticalCheckEvent(this, target, weapon, source, mutableCriticalMultiplier, critsDisabled, initialCriticalAttack)
     criticalCheckEvent.callEvent()
-    criticalAttack = criticalCheckEvent.result.getBoolOrElse(criticalAttack)
+    val criticalAttack = criticalCheckEvent.result.getBoolOrElse(initialCriticalAttack)
 
     // Apply critical hit modifications
     if (criticalAttack) {
         source = source.toCritical()
-        damage *= criticalCheckEvent.criticalMultiplier
+        damage *= mutableCriticalMultiplier.value
     }
 
     // Total damage after all modifications
@@ -457,7 +454,7 @@ fun Player.performAttack(
         }
     }
 
-    val targetVelocity = target.velocity.clone()
+    val targetVelocity = target.velocity
     val targetHealth = if (target is LivingEntity) target.health else 0.0
 
     // Apply damage and return if not successful
@@ -480,25 +477,26 @@ fun Player.performAttack(
     if (knockback > 0.0f) {
         if (target is LivingEntity) {
             if (Prerequisite.HAS_PAPER.isMet) {
-                target.applyKnockback(
-                    knockback * 0.5,
-                    sin((this.yaw * (Math.PI / 180.0)).toFloat()).toDouble(),
-                    -cos((this.yaw * Math.PI / 180.0).toFloat()).toDouble(),
+                val targetKnockbackResistance = target.knockbackResistance.coerceAtLeast(0.0)
+                target.applyKnockbackWithoutResistance(
+                    knockback * 0.5 / (1.0 + targetKnockbackResistance),
+                    sin(this.yaw * (Math.PI / 180.0).toFloat()).toDouble(),
+                    -cos(this.yaw * (Math.PI / 180.0).toFloat()).toDouble(),
                     this, EntityKnockbackEvent.Cause.ENTITY_ATTACK
                 )
             } else {
                 target.applyKnockback(
                     knockback * 0.5,
-                    sin((this.yaw * (Math.PI / 180.0)).toFloat()).toDouble(),
-                    -cos((this.yaw * Math.PI / 180.0).toFloat()).toDouble()
+                    sin(this.yaw * (Math.PI / 180.0).toFloat()).toDouble(),
+                    -cos(this.yaw * (Math.PI / 180.0).toFloat()).toDouble()
                 )
             }
         } else {
             if (Prerequisite.HAS_PAPER.isMet) {
                 target.push(
-                    -sin((this.yaw * (Math.PI / 180.0)).toFloat()).toDouble() * knockback * 0.5,
+                    -sin(this.yaw * (Math.PI / 180.0).toFloat()).toDouble() * knockback * 0.5,
                     0.1,
-                    cos(((this.yaw * Math.PI / 180.0).toFloat())).toDouble() * knockback * 0.5,
+                    cos(this.yaw * (Math.PI / 180.0).toFloat()).toDouble() * knockback * 0.5,
                     this
                 )
             } else {
@@ -542,8 +540,9 @@ fun Player.performAttack(
             entity.lastDamageCancelled = false
             if (!entity.hurtServer(this.world, sweepSource, enchantedSweepDamage) || !entity.lastDamageCancelled) continue
             if (Prerequisite.HAS_PAPER.isMet) {
-                entity.applyKnockback(
-                    0.4,
+                val entityKnockbackResistance = entity.knockbackResistance.coerceAtLeast(0.0)
+                entity.applyKnockbackWithoutResistance(
+                    0.4 / (1.0 + entityKnockbackResistance),
                     sin((this.yaw * (Math.PI / 180.0)).toFloat()).toDouble(),
                     -cos((this.yaw * Math.PI / 180.0).toFloat()).toDouble(),
                     this, EntityKnockbackEvent.Cause.SWEEP_ATTACK
@@ -579,13 +578,14 @@ fun Player.performAttack(
 
     if (target is Player && target.hurtMarked) {
         var cancelled = false
-        val velocityEvent = PlayerVelocityEvent(target, targetVelocity)
+        val velocity2 = target.velocity
+        val velocityEvent = PlayerVelocityEvent(target, velocity2)
         velocityEvent.callEvent()
 
-        if (!velocityEvent.isCancelled) {
-            target.velocity = velocityEvent.velocity
-        } else {
+        if (velocityEvent.isCancelled) {
             cancelled = true
+        } else if (velocity2 != velocityEvent.velocity) {
+            target.velocity = velocityEvent.velocity
         }
 
         if (!cancelled) {
@@ -596,6 +596,12 @@ fun Player.performAttack(
     }
 
     if (criticalAttack) {
+        this.sendSoundEffect(
+            this.x, this.y, this.z,
+            Sound.ENTITY_PLAYER_ATTACK_CRIT,
+            SoundCategory.PLAYERS,
+            1.0f, 1.0f
+        )
         this.sendCriticalHitEffects(target)
     }
 
@@ -715,7 +721,7 @@ fun Player.performAttack(
 
     if (!weapon.isEmpty && parentTarget is LivingEntity) {
         if (didHurt) {
-            weapon.hurtAndBreak(weapon.itemDamagePerAttack, this, slot ?: EquipmentSlot.HAND)
+            weapon.hurtAndBreak(weapon.itemDamagePerAttack, this, slot)
         }
         if (weapon.isEmpty && weapon == this.inventory.getItem(slot)) {
             this.inventory.setItem(slot, ItemStack.empty())

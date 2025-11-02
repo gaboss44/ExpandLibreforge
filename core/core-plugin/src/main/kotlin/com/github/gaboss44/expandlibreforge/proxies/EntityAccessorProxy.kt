@@ -55,6 +55,15 @@ interface EntityAccessorProxy {
         paperCause: EntityKnockbackEvent.Cause
     )
 
+    fun knockbackWithoutResistance(
+        target: LivingEntity,
+        strength: Double,
+        x: Double,
+        z: Double,
+        attacker: Entity?,
+        paperCause: EntityKnockbackEvent.Cause
+    )
+
     fun push(
         target: Entity,
         x: Double,

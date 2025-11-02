@@ -17,6 +17,7 @@ import org.bukkit.entity.Projectile
 import org.bukkit.event.Event
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
+import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.util.Vector
 import java.util.function.BooleanSupplier
 
@@ -173,6 +174,13 @@ fun getSoundCategoryOrElse(string: String?, default: SoundCategory): SoundCatego
     } catch (_: IllegalArgumentException) {
         default
     }
+}
+
+fun getEquipmentSlot(string: String?): EquipmentSlot? {
+    if (string == null) return null
+    return try {
+        EquipmentSlot.valueOf(string.uppercase())
+    } catch (_: IllegalArgumentException) { null }
 }
 
 fun getEventResult(string: String?): Event.Result? {

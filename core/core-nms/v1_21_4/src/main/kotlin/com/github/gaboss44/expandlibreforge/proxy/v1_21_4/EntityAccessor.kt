@@ -10,6 +10,7 @@ import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket
 import net.minecraft.network.protocol.game.ClientboundSoundPacket
 import net.minecraft.stats.Stats
 import net.minecraft.world.entity.ai.attributes.Attributes
+import net.minecraft.world.phys.Vec3
 import org.bukkit.Sound
 import org.bukkit.SoundCategory
 import org.bukkit.World
@@ -88,6 +89,56 @@ class EntityAccessor : EntityAccessorProxy {
         paperCause: EntityKnockbackEvent.Cause
     ) {
         target.toNMS().knockback(strength, x, z, attacker?.toNMS(), paperCause)
+    }
+
+    override fun knockbackWithoutResistance(
+        target: LivingEntity,
+        strength: Double,
+        x: Double,
+        z: Double,
+        attacker: Entity?,
+        paperCause: EntityKnockbackEvent.Cause
+    ) {
+        val target = target.toNMS()
+        val attacker = attacker?.toNMS()
+        var x1 = x
+        var z1 = z
+
+        val deltaMovement = target.deltaMovement
+
+        while (x1 * x1 + z1 * z1 < 1.0E-5) {
+            x1 = (Math.random() - Math.random()) * 0.01
+            z1 = (Math.random() - Math.random()) * 0.01
+        }
+
+        val vec3 = Vec3(x1, 0.0, z1).normalize().scale(strength)
+
+        val finalVelocity = Vec3(
+            deltaMovement.x / 2.0 - vec3.x,
+            if (target.onGround()) minOf(0.4, deltaMovement.y / 2.0 + strength) else deltaMovement.y,
+            deltaMovement.z / 2.0 - vec3.z
+        )
+
+        val diff = finalVelocity.subtract(deltaMovement)
+
+        // Paper event
+        val event = CraftEventFactory.callEntityKnockbackEvent(
+            target.bukkitLivingEntity,
+            attacker,
+            attacker,
+            paperCause,
+            strength,
+            diff
+        )
+
+        if (event.isCancelled) return
+
+        target.hasImpulse = true
+        target.deltaMovement = deltaMovement.add(
+            event.knockback.x,
+            event.knockback.y,
+            event.knockback.z
+        )
     }
 
     override fun push(target: Entity, x: Double, y: Double, z: Double) {

@@ -18,7 +18,6 @@ import net.minecraft.world.item.enchantment.EnchantmentEffectComponents
 import net.minecraft.world.item.enchantment.EnchantmentTarget
 import net.minecraft.world.item.enchantment.ItemEnchantments
 import net.minecraft.world.item.enchantment.TargetedConditionalEffect
-import net.minecraft.world.item.enchantment.effects.EnchantmentValueEffect
 import net.minecraft.world.level.storage.loot.LootContext
 import org.apache.commons.lang3.mutable.MutableBoolean
 import org.apache.commons.lang3.mutable.MutableFloat
@@ -43,7 +42,7 @@ class EnchantmentHelper : EnchantmentHelperProxy {
         consumers: List<Consumer<EnchantmentEffectsData>>
     ) {
 
-        weapon.unwrapNMS().runIterationOnEnchantmentEffects(
+        weapon.unwrapNMS().runIterationOnEnchantmentConditionalEffects(
             component = EnchantmentEffectComponents.DAMAGE,
             context = { damageContext(world.toNMS(), it.overrideLevel.value, target.toNMS(), source.toNMS()) },
             consumers = consumers
@@ -64,7 +63,7 @@ class EnchantmentHelper : EnchantmentHelperProxy {
         source: DamageSource,
         consumers: List<Consumer<EnchantmentEffectsData>>
     ) {
-        weapon.unwrapNMS().runIterationOnEnchantmentEffects(
+        weapon.unwrapNMS().runIterationOnEnchantmentConditionalEffects(
             component = EnchantmentEffectComponents.SMASH_DAMAGE_PER_FALLEN_BLOCK,
             context = { damageContext(world.toNMS(), it.overrideLevel.value, target.toNMS(), source.toNMS()) },
             consumers = consumers
@@ -85,7 +84,7 @@ class EnchantmentHelper : EnchantmentHelperProxy {
         source: DamageSource,
         consumers: List<Consumer<EnchantmentEffectsData>>
     ) {
-        weapon.unwrapNMS().runIterationOnEnchantmentEffects(
+        weapon.unwrapNMS().runIterationOnEnchantmentConditionalEffects(
             component = EnchantmentEffectComponents.KNOCKBACK,
             context = { damageContext(world.toNMS(), it.overrideLevel.value, target.toNMS(), source.toNMS()) },
             consumers = consumers
@@ -105,7 +104,7 @@ class EnchantmentHelper : EnchantmentHelperProxy {
         source: DamageSource,
         consumers: List<Consumer<EnchantmentEffectsInSlotData>>
     ) {
-        entity.toNMS().runIterationOnEnchantmentEffects(
+        entity.toNMS().runIterationOnEnchantmentConditionalEffects(
             component = EnchantmentEffectComponents.DAMAGE_IMMUNITY,
             context = { damageContext(world.toNMS(), it.overrideLevel.value, entity.toNMS(), source.toNMS()) },
             consumers = consumers
@@ -166,7 +165,7 @@ class EnchantmentHelper : EnchantmentHelperProxy {
         bySlotConsumers: List<Consumer<EnchantmentEffectsInSlotData>>
     ) {
         if (entity is net.minecraft.world.entity.LivingEntity) {
-            entity.runIterationOnEnchantmentEffects(
+            entity.runIterationOnEnchantmentTargetedConditionalEffects(
                 component = EnchantmentEffectComponents.POST_ATTACK,
                 context = { damageContext(level, it.overrideLevel.value, entity, source) },
                 consumers = bySlotConsumers
@@ -195,7 +194,7 @@ class EnchantmentHelper : EnchantmentHelperProxy {
 
         val attacker = source.entity
         if (attacker is net.minecraft.world.entity.LivingEntity) {
-            weapon.runIterationOnEnchantmentEffects(
+            weapon.runIterationOnEnchantmentTargetedConditionalEffects(
                 component = EnchantmentEffectComponents.POST_ATTACK,
                 context = { damageContext(level, it.overrideLevel.value, entity, source) },
                 consumers = byWeaponConsumers
@@ -204,11 +203,11 @@ class EnchantmentHelper : EnchantmentHelperProxy {
                     EnchantmentTarget.ATTACKER -> source.entity
                     EnchantmentTarget.DAMAGING_ENTITY -> source.directEntity
                     EnchantmentTarget.VICTIM -> entity
-                } ?: return@runIterationOnEnchantmentEffects
+                } ?: return@runIterationOnEnchantmentTargetedConditionalEffects
                 effect.effect.apply(level, data.overrideLevel.value, EnchantedItemInUse(weapon, EquipmentSlot.MAINHAND, attacker), affected, affected.position())
             }
         } else if (onBreak != null) {
-            weapon.runIterationOnEnchantmentEffects(
+            weapon.runIterationOnEnchantmentTargetedConditionalEffects(
                 component = EnchantmentEffectComponents.POST_ATTACK,
                 context = { damageContext(level, it.overrideLevel.value, entity, source) },
                 consumers = byWeaponConsumers
@@ -217,38 +216,13 @@ class EnchantmentHelper : EnchantmentHelperProxy {
                     EnchantmentTarget.ATTACKER -> source.entity
                     EnchantmentTarget.DAMAGING_ENTITY -> source.directEntity
                     EnchantmentTarget.VICTIM -> entity
-                } ?: return@runIterationOnEnchantmentEffects
+                } ?: return@runIterationOnEnchantmentTargetedConditionalEffects
                 effect.effect.apply(level, data.overrideLevel.value, EnchantedItemInUse(weapon, null, null, onBreak), affected, affected.position())
             }
         }
     }
 
-    fun <T> net.minecraft.world.item.ItemStack.runIterationOnEnchantmentEffects(
-        component: DataComponentType<List<T>>,
-        consumers: List<Consumer<EnchantmentEffectsData>>,
-        visitor: (EnchantmentEffectsData, Holder<Enchantment>, T) -> Unit
-    ) {
-        val enchantments = this.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY)
-        for (entry in enchantments.entrySet()) {
-            val enchantmentEffects = entry.key!!.value().getEffects(component)
-            if (enchantmentEffects.isEmpty()) {
-                continue
-            }
-
-            val enchantmentEffectsData = EnchantmentEffectsData(
-                enchantment = CraftEnchantment.minecraftHolderToBukkit(entry.key!!),
-                level = entry.intValue
-            )
-
-            consumers.forEach { it.accept(enchantmentEffectsData) }
-
-            for (effect in enchantmentEffects) {
-                visitor.invoke(enchantmentEffectsData, entry.key, effect)
-            }
-        }
-    }
-
-    fun <T : ConditionalEffect<*>> net.minecraft.world.item.ItemStack.runIterationOnEnchantmentEffects(
+    fun <T : ConditionalEffect<*>> net.minecraft.world.item.ItemStack.runIterationOnEnchantmentConditionalEffects(
         component: DataComponentType<List<T>>,
         context: (EnchantmentEffectsData) -> LootContext,
         consumers: List<Consumer<EnchantmentEffectsData>>,
@@ -286,7 +260,7 @@ class EnchantmentHelper : EnchantmentHelperProxy {
         }
     }
 
-    fun <T : TargetedConditionalEffect<*>> net.minecraft.world.item.ItemStack.runIterationOnEnchantmentEffects(
+    fun <T : TargetedConditionalEffect<*>> net.minecraft.world.item.ItemStack.runIterationOnEnchantmentTargetedConditionalEffects(
         component: DataComponentType<List<T>>,
         context: (EnchantmentEffectsData) -> LootContext,
         consumers: List<Consumer<EnchantmentEffectsData>>,
@@ -324,7 +298,7 @@ class EnchantmentHelper : EnchantmentHelperProxy {
         }
     }
 
-    fun <T : ConditionalEffect<*>> net.minecraft.world.item.ItemStack.runIterationOnEnchantmentEffects(
+    fun <T : ConditionalEffect<*>> net.minecraft.world.item.ItemStack.runIterationOnEnchantmentConditionalEffects(
         component: DataComponentType<List<T>>,
         slot: EquipmentSlot,
         context: (EnchantmentEffectsInSlotData) -> LootContext,
@@ -371,7 +345,7 @@ class EnchantmentHelper : EnchantmentHelperProxy {
         }
     }
 
-    fun <T : TargetedConditionalEffect<*>> net.minecraft.world.item.ItemStack.runIterationOnEnchantmentEffects(
+    fun <T : TargetedConditionalEffect<*>> net.minecraft.world.item.ItemStack.runIterationOnEnchantmentTargetedConditionalEffects(
         component: DataComponentType<List<T>>,
         slot: EquipmentSlot,
         context: (EnchantmentEffectsInSlotData) -> LootContext,
@@ -418,7 +392,7 @@ class EnchantmentHelper : EnchantmentHelperProxy {
         }
     }
 
-    fun <T : ConditionalEffect<*>> net.minecraft.world.entity.LivingEntity.runIterationOnEnchantmentEffects(
+    fun <T : ConditionalEffect<*>> net.minecraft.world.entity.LivingEntity.runIterationOnEnchantmentConditionalEffects(
         component: DataComponentType<List<T>>,
         context: (EnchantmentEffectsInSlotData) -> LootContext,
         consumers: List<Consumer<EnchantmentEffectsInSlotData>>,
@@ -427,7 +401,7 @@ class EnchantmentHelper : EnchantmentHelperProxy {
     ) {
         for (slot in EquipmentSlot.VALUES) {
             val itemStack = this.getItemBySlot(slot)
-            itemStack.runIterationOnEnchantmentEffects(
+            itemStack.runIterationOnEnchantmentConditionalEffects(
                 component = component,
                 slot = slot,
                 context = context,
@@ -439,7 +413,7 @@ class EnchantmentHelper : EnchantmentHelperProxy {
         }
     }
 
-    fun <T : TargetedConditionalEffect<*>> net.minecraft.world.entity.LivingEntity.runIterationOnEnchantmentEffects(
+    fun <T : TargetedConditionalEffect<*>> net.minecraft.world.entity.LivingEntity.runIterationOnEnchantmentTargetedConditionalEffects(
         component: DataComponentType<List<T>>,
         context: (EnchantmentEffectsInSlotData) -> LootContext,
         consumers: List<Consumer<EnchantmentEffectsInSlotData>>,
@@ -448,7 +422,7 @@ class EnchantmentHelper : EnchantmentHelperProxy {
     ) {
         for (slot in EquipmentSlot.VALUES) {
             val itemStack = this.getItemBySlot(slot)
-            itemStack.runIterationOnEnchantmentEffects(
+            itemStack.runIterationOnEnchantmentTargetedConditionalEffects(
                 component = component,
                 slot = slot,
                 context = context,
@@ -456,127 +430,6 @@ class EnchantmentHelper : EnchantmentHelperProxy {
                 onConsume = onConsume
             ) { data, holder, effect ->
                 visitor.invoke(data, holder, slot, effect)
-            }
-        }
-    }
-
-
-    /*
-        Unused
-    */
-
-    fun net.minecraft.world.item.ItemStack.runIterationOnEnchantments(
-        consumers: List<Consumer<EnchantmentEffectsData>>,
-        visitor: (Holder<Enchantment>, EnchantmentEffectsData) -> Unit
-    ) {
-        val enchantments = this.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY)
-        for (entry in enchantments.entrySet()) {
-            val enchantmentEffectsData = EnchantmentEffectsData(
-                enchantment = CraftEnchantment.minecraftHolderToBukkit(entry.key!!),
-                level = entry.intValue
-            )
-
-            consumers.forEach { it.accept(enchantmentEffectsData) }
-
-            visitor.invoke(entry.key!!, enchantmentEffectsData)
-        }
-    }
-
-    fun Enchantment.modifyDamage(
-        level: ServerLevel,
-        enchantmentLevel: Int,
-        entity: net.minecraft.world.entity.Entity,
-        damageSource: net.minecraft.world.damagesource.DamageSource,
-        value: MutableFloat,
-        forceEffects: Boolean = false
-    ) {
-        if (forceEffects) {
-            modifyValue(
-                EnchantmentEffectComponents.DAMAGE,
-                enchantmentLevel,
-                entity,
-                value
-            )
-        } else {
-            modifyDamageFilteredValue(
-                EnchantmentEffectComponents.DAMAGE,
-                level,
-                enchantmentLevel,
-                entity,
-                damageSource,
-                value
-            )
-        }
-    }
-
-    fun Enchantment.modifyFallBasedDamage(
-        level: ServerLevel,
-        enchantmentLevel: Int,
-        entity: net.minecraft.world.entity.Entity,
-        damageSource: net.minecraft.world.damagesource.DamageSource,
-        value: MutableFloat,
-        forceEffects: Boolean = false
-    ) {
-        if (forceEffects) {
-            modifyValue(
-                EnchantmentEffectComponents.SMASH_DAMAGE_PER_FALLEN_BLOCK,
-                enchantmentLevel,
-                entity,
-                value
-            )
-        } else {
-            modifyDamageFilteredValue(
-                EnchantmentEffectComponents.SMASH_DAMAGE_PER_FALLEN_BLOCK,
-                level,
-                enchantmentLevel,
-                entity,
-                damageSource,
-                value
-            )
-        }
-    }
-
-    fun Enchantment.modifyValue(
-        component: DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>>,
-        enchantmentLevel: Int,
-        entity: net.minecraft.world.entity.Entity,
-        value: MutableFloat
-    ) {
-        applyEffects(
-            this.getEffects(component)
-        ) { effect ->
-            value.value = effect.process(
-                enchantmentLevel,
-                entity.getRandom(),
-                value.toFloat()
-            )
-        }
-    }
-
-    fun Enchantment.modifyDamageFilteredValue(
-        component: DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>>,
-        level: ServerLevel,
-        enchantmentLevel: Int,
-        entity: net.minecraft.world.entity.Entity,
-        damageSource: net.minecraft.world.damagesource.DamageSource,
-        value: MutableFloat
-    ) {
-        applyEffects(
-            this.getEffects(component),
-            damageContext(level, enchantmentLevel, entity, damageSource)
-        ) { effect ->
-            value.value = effect.process(
-                enchantmentLevel,
-                entity.getRandom(),
-                value.toFloat()
-            )
-        }
-    }
-
-    fun <T> applyEffects(effects: List<ConditionalEffect<T>>, context: LootContext? = null, applier: Consumer<T>) {
-        for (effect in effects) {
-            if (context == null || effect.matches(context)) {
-                applier.accept(effect.effect())
             }
         }
     }

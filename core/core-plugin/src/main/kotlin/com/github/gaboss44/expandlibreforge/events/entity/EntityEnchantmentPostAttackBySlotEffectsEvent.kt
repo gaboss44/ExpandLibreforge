@@ -5,7 +5,6 @@ import org.bukkit.damage.DamageSource
 import org.bukkit.entity.Entity
 import org.bukkit.entity.LivingEntity
 import org.bukkit.event.HandlerList
-import org.bukkit.inventory.ItemStack
 
 @Suppress("UnstableApiUsage")
 class EntityEnchantmentPostAttackBySlotEffectsEvent(
@@ -17,16 +16,6 @@ class EntityEnchantmentPostAttackBySlotEffectsEvent(
     enchantmentUser,
     enchantmentEffectsData
 ) {
-
-    private var _weapon: ItemStack
-
-    var weapon: ItemStack
-        get() = _weapon.clone()
-        private set(value) { _weapon = value }
-
-    init {
-        this._weapon = weapon
-    }
 
     override fun getHandlers() = handlerList
 

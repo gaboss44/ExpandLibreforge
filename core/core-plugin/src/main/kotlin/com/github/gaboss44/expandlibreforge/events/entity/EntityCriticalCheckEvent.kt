@@ -1,5 +1,6 @@
 package com.github.gaboss44.expandlibreforge.events.entity
 
+import org.apache.commons.lang3.mutable.MutableFloat
 import org.bukkit.damage.DamageSource
 import org.bukkit.entity.Entity
 import org.bukkit.entity.LivingEntity
@@ -13,7 +14,7 @@ class EntityCriticalCheckEvent(
     val target: Entity,
     val weapon: ItemStack,
     val source: DamageSource,
-    var criticalMultiplier: Float,
+    val criticalMultiplier: MutableFloat,
     val critsDisabled: Boolean,
     val originalResult: Boolean
 ) : EntityEvent(attacker) {

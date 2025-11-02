@@ -31,10 +31,14 @@ object PaperIntegration : LoadableIntegration {
 
         Effects.register(EffectResetCurrentCooldownPeriod)
 
+        Effects.register(EffectOverrideAttack)
+
         TriggerShieldDisable.registerAllInto(Triggers)
         TriggerDisableShield.registerAllInto(Triggers)
 
         TriggerLocalMove.registerAllInto(Triggers)
+
+        TriggerPreAttack.registerAllInto(Triggers)
 
         if (ClassUtils.exists("io.papermc.paper.event.entity.EntityKnockbackEvent")) {
             TriggerTakeKnockback.registerAllInto(Triggers)
