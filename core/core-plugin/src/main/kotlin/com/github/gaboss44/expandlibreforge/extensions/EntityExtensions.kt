@@ -473,7 +473,8 @@ fun Player.performAttack(
             this, it, target, mutableKnockback, knockback, weapon, source
         ).callEvent()
     }
-    knockback = mutableKnockback.value + if (sprintAttack) 1.0f else 0.0f
+    knockback = mutableKnockback.value.coerceAtLeast(0.5f)
+    if (sprintAttack) knockback += 0.5f
     if (knockback > 0.0f) {
         if (target is LivingEntity) {
             if (Prerequisite.HAS_PAPER.isMet) {
@@ -503,15 +504,15 @@ fun Player.performAttack(
                 target.push(
                     -sin((this.yaw * (Math.PI / 180.0)).toFloat()).toDouble() * knockback * 0.5,
                     0.1,
-                    cos(((this.yaw * Math.PI / 180.0).toFloat())).toDouble() * knockback * 0.5
+                    cos(this.yaw * (Math.PI / 180.0).toFloat()).toDouble() * knockback * 0.5
                 )
             }
         }
 
-        this.velocity = this.velocity.apply {
-            x *= 0.6
-            z *= 0.6
-        }
+//        this.velocity = this.velocity.apply {
+//            x *= 0.6
+//            z *= 0.6
+//        }
         if (!this.world.isSprintInterruptionOnAttackDisabled) {
             this.isSprinting = false
         }
@@ -521,15 +522,13 @@ fun Player.performAttack(
         val sweepDamage = 1.0f + this.sweepDamageRatio.toFloat() * damage
         val sweepSource = source.toKnownCause(EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK)
 
-        val entityFilter = { entity: Entity -> entity is LivingEntity &&
-                entity != this &&
-                entity != target &&
-                !this.isAlliedTo(entity) &&
-                !(entity is ArmorStand && entity.isMarker) &&
-                entity.location.distanceSquared(target.location) < 9.0
-        }
-        for (entity in this.world.getNearbyEntities(this.boundingBox.expand(1.0, 0.25, 1.0), entityFilter)) {
+        for (entity in this.world.getNearbyEntities(target.boundingBox.expand(1.0, 0.25, 1.0))) {
             entity as? LivingEntity ?: continue
+            if (entity == this) continue
+            if (entity == target) continue
+            if (this.isAlliedTo(entity)) continue
+            if (entity is ArmorStand && entity.isMarker) continue
+            if (entity.location.distanceSquared(target.location) >= 9.0) continue
             val mutableEnchantedSweepDamage = MutableFloat(sweepDamage)
             EnchantmentHelpers.modifyDamage(mutableEnchantedSweepDamage, this.world, entity, weapon, sweepSource) {
                 EntityEnchantmentDamageEffectsEvent(
@@ -538,7 +537,7 @@ fun Player.performAttack(
             }
             val enchantedSweepDamage = mutableEnchantedSweepDamage.value * attackStrengthScale
             entity.lastDamageCancelled = false
-            if (!entity.hurtServer(this.world, sweepSource, enchantedSweepDamage) || !entity.lastDamageCancelled) continue
+            if (!entity.hurtServer(this.world, sweepSource, enchantedSweepDamage) || entity.lastDamageCancelled) continue
             if (Prerequisite.HAS_PAPER.isMet) {
                 val entityKnockbackResistance = entity.knockbackResistance.coerceAtLeast(0.0)
                 entity.applyKnockbackWithoutResistance(

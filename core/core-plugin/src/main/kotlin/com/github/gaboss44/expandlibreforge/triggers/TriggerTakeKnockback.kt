@@ -23,6 +23,7 @@ sealed class TriggerTakeKnockback(id: String) : Trigger(id) {
         TriggerParameter.PROJECTILE,
         TriggerParameter.EVENT,
         TriggerParameter.VALUE,
+        TriggerParameter.ALT_VALUE,
         TriggerParameter.VELOCITY
     )
 
@@ -46,6 +47,7 @@ sealed class TriggerTakeKnockback(id: String) : Trigger(id) {
         val projectile = byEntityEvent?.tryDamagerAsProjectile()
 
         val vector = event.knockback
+        val length = vector.length()
 
         this.dispatch(
             entity.toDispatcher(),
@@ -54,7 +56,8 @@ sealed class TriggerTakeKnockback(id: String) : Trigger(id) {
                 victim = victim,
                 event = event,
                 projectile = projectile,
-                value = vector.length(),
+                value = length,
+                altValue = if (event is EntityKnockbackByEntityEvent) event.knockbackStrength.toDouble() else length,
                 velocity = vector
             )
         )
