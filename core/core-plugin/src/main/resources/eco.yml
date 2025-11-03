@@ -1,0 +1,7 @@
+environment:
+  - name: libreforge version
+    value: ${libreforgeVersion}
+
+options:
+  color: "&#DD55DA"
+  proxy-package: "com.github.gaboss44.expandlibreforge.proxy"

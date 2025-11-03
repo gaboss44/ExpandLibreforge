@@ -1,4 +1,3 @@
-
 pluginManagement {
     repositories {
         gradlePluginPortal()
@@ -12,3 +11,14 @@ plugins {
 }
 
 rootProject.name = "ExpandLibreforge"
+
+include("core")
+include("core:core-plugin")
+include("core:core-nms")
+include("core:core-nms:common")
+include("core:core-nms:v1_21_4")
+include("core:core-nms:v1_21_5")
+include("core:core-nms:v1_21_6")
+include("core:core-nms:v1_21_7")
+include("core:core-nms:v1_21_8")
+include("core:core-nms:v1_21_10")

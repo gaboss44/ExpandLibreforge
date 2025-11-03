@@ -1,0 +1,252 @@
+package com.github.gaboss44.expandlibreforge
+
+import com.github.gaboss44.expandlibreforge.conditions.*
+import com.github.gaboss44.expandlibreforge.effects.*
+import com.github.gaboss44.expandlibreforge.extensions.*
+import com.github.gaboss44.expandlibreforge.features.combo.ComboPlaceholder
+import com.github.gaboss44.expandlibreforge.features.placeholder.ExpandLibreforgePlaceholder
+import com.github.gaboss44.expandlibreforge.filters.*
+import com.github.gaboss44.expandlibreforge.triggers.*
+import com.github.gaboss44.expandlibreforge.mutators.*
+import com.github.gaboss44.expandlibreforge.integrations.*
+import com.github.gaboss44.expandlibreforge.listeners.*
+import com.github.gaboss44.expandlibreforge.proxies.*
+import com.willfp.eco.core.Prerequisite
+import com.willfp.eco.util.ClassUtils
+import com.willfp.libreforge.conditions.Conditions
+import com.willfp.libreforge.effects.Effects
+import com.willfp.libreforge.filters.Filters
+import com.willfp.libreforge.loader.LibreforgePlugin
+import com.willfp.libreforge.mutators.Mutators
+import com.willfp.libreforge.triggers.Triggers
+import org.bukkit.event.Listener
+
+class ExpandLibreforgePlugin : LibreforgePlugin() {
+
+    init {
+        ExpandLibreforgeProps.register(this)
+    }
+
+    override fun handleEnable() {
+
+        getProxy(CommonsInitializerProxy::class.java).init(this)
+        MinecraftMathFunctions.setProxyIfNeeded(getProxy(MinecraftMathProxy::class.java))
+        EnchantmentHelpers.setProxyIfNeeded(getProxy(EnchantmentHelperProxy::class.java))
+        DamageSourceExtensions.setProxyIfNeeded(getProxy(DamageSourceAccessorProxy::class.java))
+        ItemExtensions.setProxyIfNeeded(getProxy(ItemAccessorProxy::class.java))
+        EntityExtensions.setProxyIfNeeded(getProxy(EntityAccessorProxy::class.java))
+        WorldExtensions.setProxyIfNeeded(getProxy(WorldAccessorProxy::class.java))
+
+        Effects.register(EffectPlaySoundKey)
+        Effects.register(EffectPlaySoundKeyToWorld)
+
+        Effects.register(EffectSetGravity)
+        Effects.register(EffectSetSilent)
+
+        Effects.register(EffectSetNoDamageTicks)
+
+        Effects.register(EffectAntigravity)
+        Effects.register(EffectInvulnerability)
+        Effects.register(EffectSilence)
+
+        Effects.register(EffectSetXpChange)
+
+        Effects.register(EffectMultiplyProjectileVelocity)
+
+        Effects.register(EffectStartCombo)
+        Effects.register(EffectEndCombo)
+        Effects.register(EffectExtendCombo)
+        Effects.register(EffectStartOrExtendCombo)
+
+        Effects.register(EffectSetComboRenewalTicks)
+        Effects.register(EffectSetComboUpdateTicks)
+        Effects.register(EffectSetComboStartTicks)
+
+        Effects.register(EffectSetComboTriggerShouldUpdateEffects)
+
+        Effects.register(EffectSetDamageModifier)
+
+        Effects.register(EffectPutDamageMultiplier)
+
+        Effects.register(EffectSetDamageTakenByItem)
+        Effects.register(EffectRejectDamageTakenByItemUsingPoisson)
+        Effects.register(EffectRejectDamageTakenByItemDiscreetly)
+
+        Effects.register(EffectArmorMultiplier)
+        Effects.register(EffectArmorToughnessMultiplier)
+
+        Effects.register(EffectSetExhaustion)
+
+        Effects.register(EffectSetConsumedItem)
+        Effects.register(EffectSetConsumeReplacement)
+
+        Effects.register(EffectRepeatAttackFromDamageEvent)
+
+        Effects.register(EffectAttackVictim)
+
+        Effects.register(EffectSwingMainHand)
+        Effects.register(EffectSwingOffHand)
+
+        Effects.register(EffectPerformAttack)
+
+        Triggers.register(TriggerRiptide)
+        Triggers.register(TriggerInteract(this))
+        Triggers.register(TriggerInventoryInteract)
+        Triggers.register(TriggerInventoryClick)
+        Triggers.register(TriggerMineBlockStop)
+
+        TriggerXpChange.registerAllInto(Triggers)
+
+        TriggerTakeDamage.registerAllInto(Triggers)
+        TriggerInflictDamage.registerAllInto(Triggers)
+
+        TriggerComboStart.registerAllInto(Triggers)
+        TriggerComboEnd.registerAllInto(Triggers)
+        TriggerComboTick.registerAllInto(Triggers)
+
+        TriggerOfflineComboEnd.registerAllInto(Triggers)
+        TriggerOfflineComboTick.registerAllInto(Triggers)
+
+        Triggers.register(TriggerToggleShield)
+
+        TriggerProjectileHits.registerAllInto(Triggers)
+        TriggerHitByProjectile.registerAllInto(Triggers)
+
+        TriggerExhaustion.registerAllInto(Triggers)
+
+        Mutators.register(MutatorAttackDamageAsValue)
+        Mutators.register(MutatorAttackDamageAsAltValue)
+
+        Mutators.register(MutatorAttackFinalDamageAsValue)
+        Mutators.register(MutatorAttackFinalDamageAsAltValue)
+
+        Mutators.register(MutatorXpChangeAsValue)
+        Mutators.register(MutatorXpChangeAsAltValue)
+
+        MutatorComboOwner.registerAllInto(Mutators)
+
+        Conditions.register(ConditionHasCombo)
+
+        Filters.register(FilterInventoryAction)
+        Filters.register(FilterInventoryDragType)
+        Filters.register(FilterInventoryInteractType)
+        Filters.register(FilterPlayerAction)
+        Filters.register(FilterTargetReason)
+
+        Filters.register(FilterPlayerIsPresent)
+        Filters.register(FilterPlayerIsSilent)
+        Filters.register(FilterPlayerIsInvulnerable)
+        Filters.register(FilterPlayerHasGravity)
+
+        Filters.register(FilterIsSprinting)
+        Filters.register(FilterIsSneaking)
+        Filters.register(FilterIsBlocking)
+        Filters.register(FilterLocationOnGround)
+        Filters.register(FilterEntityOnGround)
+
+        Filters.register(FilterVictimIsPresent)
+        Filters.register(FilterMatchEntitiesIfPresent)
+        Filters.register(FilterIgnoreEntitiesIfPresent)
+
+        Filters.register(FilterProjectileIsPresent)
+        Filters.register(FilterMatchProjectilesIfPresent)
+        Filters.register(FilterIgnoreProjectilesIfPresent)
+
+        Filters.register(FilterDamagerIsPresent)
+
+        FilterTradeSelectIndex.registerAllInto(Filters)
+
+        FilterPlayerNoDamageTicks.registerAllInto(Filters)
+
+        FilterVictimNoDamageTicks.registerAllInto(Filters)
+
+        FilterXpChange.registerAllInto(Filters)
+
+        FilterXpOrbCount.registerAllInto(Filters)
+
+        FilterXpOrbExperience.registerAllInto(Filters)
+
+        Filters.register(FilterMatchXpOrbSpawnReasonIfPresent)
+        Filters.register(FilterIgnoreXpOrbSpawnReasonIfPresent)
+
+        Filters.register(FilterHasAnyCombo)
+
+        Filters.register(FilterComboIsPresent)
+        Filters.register(FilterMatchComboIfPresent)
+        Filters.register(FilterIgnoreComboIfPresent)
+        Filters.register(FilterHasCombos)
+
+        FilterComboCount.registerAllInto(Filters)
+        FilterComboScore.registerAllInto(Filters)
+        FilterComboRemainingTicks.registerAllInto(Filters)
+
+        FilterPlayerAttackCooldown.registerAllInto(Filters)
+        FilterVictimAttackCooldown.registerAllInto(Filters)
+
+        Filters.register(FilterVictimIsHumanEntity)
+        Filters.register(FilterVictimIsPlayer)
+
+        FilterDamageTakenByItem.registerAllInto(Filters)
+        FilterOriginalDamageTakenByItem.registerAllInto(Filters)
+
+        Filters.register(FilterDamagedItem)
+
+        Filters.register(FilterDamageType)
+        Filters.register(FilterDamageSourceIsIndirect)
+
+        Filters.register(FilterMatchExhaustionReasonIfPresent)
+        Filters.register(FilterIgnoreExhaustionReasonIfPresent)
+        FilterExhaustion.registerAllInto(Filters)
+
+        Filters.register(FilterMatchConsumeReplacementIfPresent)
+        Filters.register(FilterIgnoreConsumeReplacementIfPresent)
+
+        FilterFallDistance.registerAllInto(Filters)
+        FilterVictimFallDistance.registerAllInto(Filters)
+
+        Filters.register(FilterPlayerSameAsVictim)
+
+        Filters.register(FilterItemsInSlot)
+
+        Filters.register(FilterMatchComboPhaseIfPresent)
+        Filters.register(FilterIgnoreComboPhaseIfPresent)
+
+        if (Prerequisite.HAS_PAPER.isMet) {
+            PaperIntegration.load(this)
+        }
+
+        if (ClassUtils.exists("org.bukkit.Input")) {
+            Effects.register(EffectSetPlayerInputShouldUpdateEffects)
+
+            Triggers.register(TriggerPlayerInput)
+
+            FilterPlayerInput.registerAllInto(Filters)
+
+            Conditions.register(ConditionPlayerCurrentInput)
+        }
+
+        ComboPlaceholder.createHas(this).register()
+        ComboPlaceholder.createCount(this).register()
+        ComboPlaceholder.createScore(this).register()
+        ComboPlaceholder.createRemainingTicks(this).register()
+        ComboPlaceholder.createInitialTicks(this).register()
+        ComboPlaceholder.createMaximumTicks(this).register()
+        ComboPlaceholder.createCompletedTicks(this).register()
+
+        ExpandLibreforgePlaceholder.createFallDistance(this).register()
+    }
+
+    override fun loadListeners(): List<Listener> {
+        val listeners = mutableListOf<Listener>()
+        if (Prerequisite.HAS_PAPER.isMet) {
+            listeners.add(ServerTickListener)
+        }
+        if (ClassUtils.exists("org.bukkit.Input")) {
+            listeners.add(PlayerInputListener)
+        }
+        listeners.add(DamageListener)
+        listeners.add(PlayerJoinListener)
+        listeners.add(PlayerQuitListener)
+        return listeners.toList()
+    }
+}

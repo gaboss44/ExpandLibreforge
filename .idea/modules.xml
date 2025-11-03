@@ -2,7 +2,28 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/core-nms/common/ExpandLibreforge.core.core-nms.common.main.iml" filepath="$PROJECT_DIR$/.idea/modules/core/core-nms/common/ExpandLibreforge.core.core-nms.common.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/core-nms/common/ExpandLibreforge.core.core-nms.common.test.iml" filepath="$PROJECT_DIR$/.idea/modules/core/core-nms/common/ExpandLibreforge.core.core-nms.common.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/core-nms/ExpandLibreforge.core.core-nms.main.iml" filepath="$PROJECT_DIR$/.idea/modules/core/core-nms/ExpandLibreforge.core.core-nms.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/core-nms/v1_21_4/ExpandLibreforge.core.core-nms.v1_21_4.main.iml" filepath="$PROJECT_DIR$/.idea/modules/core/core-nms/v1_21_4/ExpandLibreforge.core.core-nms.v1_21_4.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/core-nms/v1_21_4/ExpandLibreforge.core.core-nms.v1_21_4.test.iml" filepath="$PROJECT_DIR$/.idea/modules/core/core-nms/v1_21_4/ExpandLibreforge.core.core-nms.v1_21_4.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/core-nms/v1_21_5/ExpandLibreforge.core.core-nms.v1_21_5.main.iml" filepath="$PROJECT_DIR$/.idea/modules/core/core-nms/v1_21_5/ExpandLibreforge.core.core-nms.v1_21_5.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/core-nms/v1_21_5/ExpandLibreforge.core.core-nms.v1_21_5.test.iml" filepath="$PROJECT_DIR$/.idea/modules/core/core-nms/v1_21_5/ExpandLibreforge.core.core-nms.v1_21_5.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/core-nms/v1_21_6/ExpandLibreforge.core.core-nms.v1_21_6.main.iml" filepath="$PROJECT_DIR$/.idea/modules/core/core-nms/v1_21_6/ExpandLibreforge.core.core-nms.v1_21_6.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/core-nms/v1_21_6/ExpandLibreforge.core.core-nms.v1_21_6.test.iml" filepath="$PROJECT_DIR$/.idea/modules/core/core-nms/v1_21_6/ExpandLibreforge.core.core-nms.v1_21_6.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/core-nms/v1_21_7/ExpandLibreforge.core.core-nms.v1_21_7.main.iml" filepath="$PROJECT_DIR$/.idea/modules/core/core-nms/v1_21_7/ExpandLibreforge.core.core-nms.v1_21_7.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/core-nms/v1_21_7/ExpandLibreforge.core.core-nms.v1_21_7.test.iml" filepath="$PROJECT_DIR$/.idea/modules/core/core-nms/v1_21_7/ExpandLibreforge.core.core-nms.v1_21_7.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/core-nms/v1_21_8/ExpandLibreforge.core.core-nms.v1_21_8.main.iml" filepath="$PROJECT_DIR$/.idea/modules/core/core-nms/v1_21_8/ExpandLibreforge.core.core-nms.v1_21_8.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/core-nms/v1_21_8/ExpandLibreforge.core.core-nms.v1_21_8.test.iml" filepath="$PROJECT_DIR$/.idea/modules/core/core-nms/v1_21_8/ExpandLibreforge.core.core-nms.v1_21_8.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/core-nms/v_1_21_6/ExpandLibreforge.core.core-nms.v_1_21_6.main.iml" filepath="$PROJECT_DIR$/.idea/modules/core/core-nms/v_1_21_6/ExpandLibreforge.core.core-nms.v_1_21_6.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/core-nms/v_1_21_6/ExpandLibreforge.core.core-nms.v_1_21_6.test.iml" filepath="$PROJECT_DIR$/.idea/modules/core/core-nms/v_1_21_6/ExpandLibreforge.core.core-nms.v_1_21_6.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/core-plugin/ExpandLibreforge.core.core-plugin.main.iml" filepath="$PROJECT_DIR$/.idea/modules/core/core-plugin/ExpandLibreforge.core.core-plugin.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/ExpandLibreforge.core.main.iml" filepath="$PROJECT_DIR$/.idea/modules/core/ExpandLibreforge.core.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/ExpandLibreforge.main.iml" filepath="$PROJECT_DIR$/.idea/modules/ExpandLibreforge.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/common.iml" filepath="$PROJECT_DIR$/common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/v1_21_4.iml" filepath="$PROJECT_DIR$/v1_21_4.iml" />
+      <module fileurl="file://$PROJECT_DIR$/v1_21_6.iml" filepath="$PROJECT_DIR$/v1_21_6.iml" />
+      <module fileurl="file://$PROJECT_DIR$/v1_21_7.iml" filepath="$PROJECT_DIR$/v1_21_7.iml" />
     </modules>
   </component>
 </project>

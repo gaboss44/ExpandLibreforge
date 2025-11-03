@@ -1,3 +1,6 @@
 /.gradle/
 /build/
 /bin/
+**/bin/
+**/build/
+**/.gradle/caches/paperweight/
