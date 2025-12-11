@@ -1,11 +1,12 @@
 package com.github.gaboss44.expandlibreforge.filters
 
+import com.github.gaboss44.expandlibreforge.extensions.tryGetDamageSource
 import com.willfp.eco.core.config.interfaces.Config
 import com.willfp.libreforge.NoCompileData
 import com.willfp.libreforge.filters.Filter
 import com.willfp.libreforge.triggers.TriggerData
-import org.bukkit.event.entity.EntityDamageByEntityEvent
 
+@Suppress("UnstableApiUsage")
 object FilterDamageSourceIsIndirect : Filter<NoCompileData, Boolean>("damage_source_is_indirect") {
     override fun getValue(
         config: Config,
@@ -20,8 +21,9 @@ object FilterDamageSourceIsIndirect : Filter<NoCompileData, Boolean>("damage_sou
         value: Boolean,
         compileData: NoCompileData
     ): Boolean {
-        val event = data.event as? EntityDamageByEntityEvent ?: return true
-        return event.damageSource.isIndirect == value
+        val event = data.event ?: return true
+        val source = event.tryGetDamageSource() ?: return true
+        return source.isIndirect == value
     }
 
 }

@@ -2,101 +2,17 @@
 
 package com.github.gaboss44.expandlibreforge.util
 
-import com.destroystokyo.paper.event.entity.EntityKnockbackByEntityEvent
 import com.github.gaboss44.expandlibreforge.features.combo.Combo
-import com.willfp.eco.core.Prerequisite
 import com.willfp.eco.core.config.interfaces.Config
 import com.willfp.libreforge.getDoubleFromExpression
 import com.willfp.libreforge.getIntFromExpression
 import com.willfp.libreforge.triggers.TriggerData
-import io.papermc.paper.event.player.PlayerShieldDisableEvent
 import org.bukkit.SoundCategory
-import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
-import org.bukkit.entity.Projectile
 import org.bukkit.event.Event
-import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.inventory.EquipmentSlot
-import org.bukkit.util.Vector
 import java.util.function.BooleanSupplier
-
-fun EntityDamageByEntityEvent.tryDamagerAsPlayer(): Player? {
-    return when (val damager = this.damager) {
-        is Player -> damager
-        is Projectile -> damager.shooter as? Player
-        else -> if (Prerequisite.HAS_1_20_5.isMet) {
-            damageSource.causingEntity as? Player ?:
-            damageSource.directEntity as? Player
-        } else null
-    }
-}
-
-fun EntityDamageByEntityEvent.tryDamagerAsLivingEntity(): LivingEntity? {
-    return when (val damager = this.damager) {
-        is LivingEntity -> damager
-        is Projectile -> damager.shooter as? LivingEntity
-        else -> if (Prerequisite.HAS_1_20_5.isMet) {
-            damageSource.causingEntity as? LivingEntity ?:
-            damageSource.directEntity as? LivingEntity
-        } else null
-    }
-}
-
-fun EntityDamageByEntityEvent.tryDamagerAsProjectile(): Projectile? {
-    return when (val damager = this.damager) {
-        is Projectile -> damager
-        else -> if (Prerequisite.HAS_1_20_5.isMet) {
-            damageSource.directEntity as? Projectile
-        } else null
-    }
-}
-
-fun PlayerShieldDisableEvent.tryDamagerAsPlayer(): Player? {
-    return when (val damager = this.damager) {
-        is Player -> damager
-        is Projectile -> damager.shooter as? Player
-        else -> null
-    }
-}
-
-fun PlayerShieldDisableEvent.tryDamagerAsLivingEntity(): LivingEntity? {
-    return when (val damager = this.damager) {
-        is LivingEntity -> damager
-        is Projectile -> damager.shooter as? LivingEntity
-        else -> null
-    }
-}
-
-fun PlayerShieldDisableEvent.tryDamagerAsProjectile(): Projectile? {
-    return when (val damager = this.damager) {
-        is Projectile -> damager
-        else -> null
-    }
-}
-
-fun EntityKnockbackByEntityEvent.tryDamagerAsPlayer(): Player? {
-    return when (val damager = this.hitBy) {
-        is Player -> damager
-        is Projectile -> damager.shooter as? Player
-        else -> null
-    }
-}
-
-fun EntityKnockbackByEntityEvent.tryDamagerAsLivingEntity(): LivingEntity? {
-    return when (val damager = this.hitBy) {
-        is LivingEntity -> damager
-        is Projectile -> damager.shooter as? LivingEntity
-        else -> null
-    }
-}
-
-fun EntityKnockbackByEntityEvent.tryDamagerAsProjectile(): Projectile? {
-    return when (val damager = this.hitBy) {
-        is Projectile -> damager
-        else -> null
-    }
-}
 
 @Suppress("DEPRECATION")
 fun Config.getDamageModifierEnum(key: String): EntityDamageEvent.DamageModifier? {
@@ -252,16 +168,4 @@ fun Float.scaledBy(ranges: List<Pair<Number, Number>>): Float {
     // When we're here, it means the value is larger than all limits
     val (pastScale, pastLimit) = ranges.last()
     return accumulated + pastScale.toFloat() * (this - pastLimit.toFloat())
-}
-
-fun calculateViewVector(xRot: Float, yRot: Float, sin: (Float) -> Float, cos: (Float) -> Float): Vector {
-    val f = xRot * (Math.PI / 180.0).toFloat()
-    val f1 = -yRot * (Math.PI / 180.0).toFloat()
-
-    val cos = cos(f1)
-    val sin = sin(f1)
-    val cos1 = cos(f)
-    val sin1 = sin(f)
-
-    return Vector(sin * cos1, -sin1, cos * cos1)
 }

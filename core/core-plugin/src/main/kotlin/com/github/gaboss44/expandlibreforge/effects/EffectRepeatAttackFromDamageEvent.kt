@@ -10,6 +10,7 @@ import com.willfp.libreforge.triggers.TriggerParameter
 import org.bukkit.entity.Damageable
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 
+@Suppress("UnstableApiUsage")
 object EffectRepeatAttackFromDamageEvent : Effect<NoCompileData>("repeat_attack_from_damage_event") {
     override val parameters = setOf(
         TriggerParameter.EVENT

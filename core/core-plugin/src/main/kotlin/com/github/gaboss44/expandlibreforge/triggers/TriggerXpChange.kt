@@ -6,6 +6,7 @@ import com.willfp.libreforge.triggers.TriggerData
 import com.willfp.libreforge.triggers.TriggerParameter
 import com.willfp.libreforge.triggers.Triggers
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.player.PlayerExpChangeEvent
 
 sealed class TriggerXpChange(id: String) : Trigger(id) {
@@ -35,31 +36,37 @@ sealed class TriggerXpChange(id: String) : Trigger(id) {
             category.register(NormalPriority)
             category.register(HighPriority)
             category.register(HighestPriority)
+            category.register(Monitor)
         }
     }
 
     object LowestPriority : TriggerXpChange("xp_change_lowest_priority") {
-        @EventHandler(priority = org.bukkit.event.EventPriority.LOWEST, ignoreCancelled = true)
+        @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
         fun onXpChange(event: PlayerExpChangeEvent) = handle(event)
     }
 
     object LowPriority : TriggerXpChange("xp_change_low_priority") {
-        @EventHandler(priority = org.bukkit.event.EventPriority.LOW, ignoreCancelled = true)
+        @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
         fun onXpChange(event: PlayerExpChangeEvent) = handle(event)
     }
 
     object NormalPriority : TriggerXpChange("xp_change_normal_priority") {
-        @EventHandler(priority = org.bukkit.event.EventPriority.NORMAL, ignoreCancelled = true)
+        @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
         fun onXpChange(event: PlayerExpChangeEvent) = handle(event)
     }
 
     object HighPriority : TriggerXpChange("xp_change_high_priority") {
-        @EventHandler(priority = org.bukkit.event.EventPriority.HIGH, ignoreCancelled = true)
+        @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
         fun onXpChange(event: PlayerExpChangeEvent) = handle(event)
     }
 
     object HighestPriority : TriggerXpChange("xp_change_highest_priority") {
-        @EventHandler(priority = org.bukkit.event.EventPriority.HIGHEST, ignoreCancelled = true)
+        @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+        fun onXpChange(event: PlayerExpChangeEvent) = handle(event)
+    }
+
+    object Monitor : TriggerXpChange("xp_change_monitor") {
+        @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
         fun onXpChange(event: PlayerExpChangeEvent) = handle(event)
     }
 }

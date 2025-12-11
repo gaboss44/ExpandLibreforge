@@ -1,14 +1,14 @@
 package com.github.gaboss44.expandlibreforge.triggers
 
-import com.github.gaboss44.expandlibreforge.util.tryDamagerAsLivingEntity
-import com.github.gaboss44.expandlibreforge.util.tryDamagerAsProjectile
 import com.willfp.libreforge.toDispatcher
 import com.willfp.libreforge.triggers.Trigger
 import com.willfp.libreforge.triggers.TriggerData
 import com.willfp.libreforge.triggers.TriggerParameter
 import com.willfp.libreforge.triggers.Triggers
+import com.willfp.libreforge.triggers.tryAsLivingEntity
 import io.papermc.paper.event.player.PlayerShieldDisableEvent
 import org.bukkit.entity.Player
+import org.bukkit.entity.Projectile
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 
@@ -23,8 +23,8 @@ sealed class TriggerDisableShield(id: String) : Trigger(id) {
 
     fun handle(event: PlayerShieldDisableEvent) {
         val victim = event.player
-        val attacker = event.tryDamagerAsLivingEntity()
-        val projectile = event.tryDamagerAsProjectile()
+        val attacker = event.damager.tryAsLivingEntity()
+        val projectile = event.damager as? Projectile
 
         if (attacker != null) {
             this.dispatch(

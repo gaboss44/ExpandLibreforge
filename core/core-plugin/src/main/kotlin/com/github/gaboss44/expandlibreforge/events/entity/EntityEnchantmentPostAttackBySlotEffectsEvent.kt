@@ -9,12 +9,14 @@ import org.bukkit.event.HandlerList
 @Suppress("UnstableApiUsage")
 class EntityEnchantmentPostAttackBySlotEffectsEvent(
     enchantmentUser: LivingEntity,
-    enchantmentEffectsData: EnchantmentEffectsInSlotData,
-    val target: Entity,
-    val source: DamageSource
-) : EntityEnchantmentEffectsInSlotEvent(
+    override val enchantmentEffectsData: EnchantmentEffectsInSlotData,
+    target: Entity,
+    damageSource: DamageSource
+) : EntityEnchantmentPostAttackEffectEvent(
     enchantmentUser,
-    enchantmentEffectsData
+    enchantmentEffectsData,
+    target,
+    damageSource
 ) {
 
     override fun getHandlers() = handlerList

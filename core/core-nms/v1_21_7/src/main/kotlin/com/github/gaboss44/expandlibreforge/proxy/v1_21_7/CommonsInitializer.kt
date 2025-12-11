@@ -10,6 +10,7 @@ import net.minecraft.sounds.SoundSource
 import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.entity.projectile.AbstractArrow
 import net.minecraft.world.item.ItemStack
 import org.bukkit.Sound
 import org.bukkit.SoundCategory
@@ -17,6 +18,7 @@ import org.bukkit.World
 import org.bukkit.craftbukkit.CraftSound
 import org.bukkit.craftbukkit.CraftWorld
 import org.bukkit.craftbukkit.damage.CraftDamageSource
+import org.bukkit.craftbukkit.entity.CraftAbstractArrow
 import org.bukkit.craftbukkit.entity.CraftEntity
 import org.bukkit.craftbukkit.entity.CraftLivingEntity
 import org.bukkit.craftbukkit.entity.CraftPlayer
@@ -44,6 +46,10 @@ class CommonsInitializer : CommonsInitializerProxy {
 
         override fun toNMS(entity: org.bukkit.entity.LivingEntity): LivingEntity {
             return (entity as CraftLivingEntity).handle
+        }
+
+        override fun toNMS(arrow: org.bukkit.entity.AbstractArrow): AbstractArrow {
+            return (arrow as CraftAbstractArrow).handle
         }
 
         override fun toNMS(source: org.bukkit.damage.DamageSource): DamageSource {

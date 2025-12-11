@@ -1,7 +1,7 @@
 name: ExpandLibreforge
-version: '1.0.0'
+version: ${pluginVersion}
 main: com.github.gaboss44.expandlibreforge.ExpandLibreforgePlugin
-api-version: '1.18'
+api-version: '1.21.4'
 prefix: ExpandLibreforge
 load: STARTUP
 authors: [ gaboss44 ]
@@ -11,3 +11,6 @@ depend:
 softdepend:
   - libreforge
   - ProtocolLib
+libraries:
+  - net.bytebuddy:byte-buddy:1.18.0
+  - net.bytebuddy:byte-buddy-agent:1.18.0

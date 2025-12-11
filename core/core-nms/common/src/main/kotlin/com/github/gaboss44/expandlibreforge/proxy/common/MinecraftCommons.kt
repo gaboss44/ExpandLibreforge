@@ -1,3 +1,4 @@
+@file:Suppress("UnstableApiUsage")
 package com.github.gaboss44.expandlibreforge.proxy.common
 
 import net.minecraft.server.level.ServerLevel
@@ -8,6 +9,7 @@ import org.bukkit.Sound
 import org.bukkit.SoundCategory
 import org.bukkit.World
 import org.bukkit.damage.DamageSource
+import org.bukkit.entity.AbstractArrow
 import org.bukkit.entity.Entity
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
@@ -25,6 +27,9 @@ fun Entity.toNMS(): net.minecraft.world.entity.Entity =
     commonsProvider.toNMS(this)
 
 fun LivingEntity.toNMS(): net.minecraft.world.entity.LivingEntity =
+    commonsProvider.toNMS(this)
+
+fun AbstractArrow.toNMS(): net.minecraft.world.entity.projectile.AbstractArrow =
     commonsProvider.toNMS(this)
 
 fun DamageSource.toNMS(): net.minecraft.world.damagesource.DamageSource =
@@ -51,6 +56,8 @@ interface CommonsProvider {
     fun toNMS(entity: Entity): net.minecraft.world.entity.Entity
 
     fun toNMS(entity: LivingEntity): net.minecraft.world.entity.LivingEntity
+
+    fun toNMS(arrow: AbstractArrow): net.minecraft.world.entity.projectile.AbstractArrow
 
     fun toNMS(source: DamageSource): net.minecraft.world.damagesource.DamageSource
 

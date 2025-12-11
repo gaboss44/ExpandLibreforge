@@ -11,23 +11,18 @@ import org.bukkit.inventory.ItemStack
 class EntityEnchantmentPostAttackByWeaponEffectsEvent(
     enchantmentUser: LivingEntity,
     enchantmentEffectsData: EnchantmentEffectsData,
-    val target: Entity,
+    target: Entity,
     weapon: ItemStack,
-    val source: DamageSource
-) : EntityEnchantmentEffectsEvent(
+    damageSource: DamageSource
+) : EntityEnchantmentPostAttackEffectEvent(
     enchantmentUser,
-    enchantmentEffectsData
+    enchantmentEffectsData,
+    target,
+    damageSource
 ) {
 
-    private var _weapon: ItemStack
-
-    var weapon: ItemStack
-        get() = _weapon.clone()
-        private set(value) { _weapon = value }
-
-    init {
-        this._weapon = weapon
-    }
+    var weapon = weapon
+        get() = field.clone()
 
     override fun getHandlers() = handlerList
 

@@ -85,12 +85,13 @@ object EffectPlaySoundKeyToWorld : Effect<NoCompileData>("play_sound_key_to_worl
                 NumberUtils.evaluateExpression(expr, config.toPlaceholderContext(data)).toFloat()
             } ?: 1.0f
 
-        if (Prerequisite.HAS_1_20_3.isMet && config.has("seed")) {
+        // if (Prerequisite.HAS_1_20_3.isMet && config.has("seed")) {
+        if (config.has("seed")) {
             val seed = config.getDoubleFromExpression("seed", data).toLong()
             world.playSound(centerLocation, sound, category, volume.toFloat() * volumeMultiplier, pitch.toFloat(), seed)
+        } else {
+            world.playSound(centerLocation, sound, category, volume.toFloat() * volumeMultiplier, pitch.toFloat())
         }
-
-        else world.playSound(centerLocation, sound, category, volume.toFloat() * volumeMultiplier, pitch.toFloat())
 
         return true
     }

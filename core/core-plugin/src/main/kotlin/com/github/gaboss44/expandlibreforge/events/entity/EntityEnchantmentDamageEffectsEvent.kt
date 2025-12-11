@@ -1,7 +1,7 @@
 package com.github.gaboss44.expandlibreforge.events.entity
 
+import com.github.gaboss44.expandlibreforge.events.DamageSourceAwareEvent
 import com.github.gaboss44.expandlibreforge.extensions.EnchantmentEffectsData
-import org.apache.commons.lang3.mutable.MutableFloat
 import org.bukkit.damage.DamageSource
 import org.bukkit.entity.Entity
 import org.bukkit.entity.LivingEntity
@@ -13,62 +13,17 @@ class EntityEnchantmentDamageEffectsEvent(
     enchantmentUser: LivingEntity,
     enchantmentEffectsData: EnchantmentEffectsData,
     val target: Entity,
-    val damage: Float,
-    val overrideDamage: MutableFloat,
+    var damage: Float,
     val originalDamage: Float,
     weapon: ItemStack,
-    val source: DamageSource
+    override val damageSource: DamageSource
 ) : EntityEnchantmentEffectsEvent(
     enchantmentUser,
     enchantmentEffectsData
-) {
-    constructor(
-        enchantmentUser: LivingEntity,
-        enchantmentEffectsData: EnchantmentEffectsData,
-        target: Entity,
-        damage: Float,
-        originalDamage: Float,
-        weapon: ItemStack,
-        source: DamageSource
-    ) : this(
-        enchantmentUser,
-        enchantmentEffectsData,
-        target,
-        damage,
-        MutableFloat(damage),
-        originalDamage,
-        weapon,
-        source
-    )
+), DamageSourceAwareEvent {
 
-    constructor(
-        enchantmentUser: LivingEntity,
-        enchantmentEffectsData: EnchantmentEffectsData,
-        target: Entity,
-        overrideDamage: MutableFloat,
-        originalDamage: Float,
-        weapon: ItemStack,
-        source: DamageSource
-    ) : this(
-        enchantmentUser,
-        enchantmentEffectsData,
-        target,
-        overrideDamage.value,
-        overrideDamage,
-        originalDamage,
-        weapon,
-        source
-    )
-
-    private var _weapon: ItemStack
-
-    var weapon: ItemStack
-        get() = _weapon.clone()
-        private set(value) { _weapon = value }
-
-    init {
-        this._weapon = weapon
-    }
+    var weapon = weapon
+        get() = field.clone()
 
     override fun getHandlers() = handlerList
 

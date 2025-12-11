@@ -1,8 +1,7 @@
 package com.github.gaboss44.expandlibreforge.triggers
 
+import com.github.gaboss44.expandlibreforge.extensions.nonEmptyCurrentWeapon
 import com.github.gaboss44.expandlibreforge.features.multipliers.DamageMultipliers
-import com.github.gaboss44.expandlibreforge.util.tryDamagerAsLivingEntity
-import com.github.gaboss44.expandlibreforge.util.tryDamagerAsProjectile
 import com.willfp.libreforge.toDispatcher
 import com.willfp.libreforge.triggers.Trigger
 import com.willfp.libreforge.triggers.TriggerData
@@ -11,16 +10,20 @@ import com.willfp.libreforge.triggers.Triggers
 import com.willfp.libreforge.triggers.tryAsLivingEntity
 import io.lumine.mythic.bukkit.MythicBukkit
 import org.bukkit.Bukkit
+import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
+import org.bukkit.entity.Projectile
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
 
+@Suppress("UnstableApiUsage")
 sealed class TriggerTakeDamage(id: String) : Trigger(id) {
     override val parameters = setOf(
         TriggerParameter.PLAYER,
         TriggerParameter.VICTIM,
+        TriggerParameter.ITEM,
         TriggerParameter.PROJECTILE,
         TriggerParameter.EVENT,
         TriggerParameter.VALUE,
@@ -28,29 +31,34 @@ sealed class TriggerTakeDamage(id: String) : Trigger(id) {
     )
 
     fun handle(event: EntityDamageEvent) {
-
+        val source = event.damageSource
         val entity = event.entity
+
+        val byEntityEvent = event as? EntityDamageByEntityEvent
+
+        val attacker =
+            byEntityEvent?.damager?.tryAsLivingEntity() ?:
+            source.causingEntity as? LivingEntity ?:
+            source.directEntity as? LivingEntity
 
         if (Bukkit.getPluginManager().isPluginEnabled("MythicMobs")) {
             if (event is EntityDamageByEntityEvent) {
-                val attacker = event.damager.tryAsLivingEntity()
-                if (MythicBukkit.inst().mobManager.isMythicMob(attacker)) {
+                if (attacker != null && MythicBukkit.inst().mobManager.isMythicMob(attacker)) {
                     return
                 }
             }
         }
 
-        val byEntityEvent = event as? EntityDamageByEntityEvent
-
-        val victim = byEntityEvent?.tryDamagerAsLivingEntity()
-
-        val projectile = byEntityEvent?.tryDamagerAsProjectile()
+        val projectile =
+            byEntityEvent?.damager as? Projectile ?:
+            source.directEntity as? Projectile
 
         this.dispatch(
             entity.toDispatcher(),
             TriggerData(
                 player = entity as? Player,
-                victim = victim,
+                victim = attacker,
+                item = attacker?.nonEmptyCurrentWeapon,
                 event = event,
                 projectile = projectile,
                 value = event.finalDamage * DamageMultipliers.calculate(event),

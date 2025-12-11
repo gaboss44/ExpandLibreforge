@@ -5,7 +5,6 @@ import com.github.gaboss44.expandlibreforge.events.combo.PlayerComboEvent
 import com.github.gaboss44.expandlibreforge.features.combo.Combo
 import com.github.gaboss44.expandlibreforge.util.ComboTriggeredEffect
 import com.willfp.eco.core.config.interfaces.Config
-import com.willfp.libreforge.ConfigArguments
 import com.willfp.libreforge.NoCompileData
 import com.willfp.libreforge.arguments
 import com.willfp.libreforge.triggers.TriggerData

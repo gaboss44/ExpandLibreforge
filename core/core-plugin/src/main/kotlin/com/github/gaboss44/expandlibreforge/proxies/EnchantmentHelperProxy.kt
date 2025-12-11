@@ -41,6 +41,23 @@ interface EnchantmentHelperProxy {
         consumers: List<Consumer<EnchantmentEffectsData>>
     )
 
+    fun modifyDamageProtection(
+        protection: MutableFloat,
+        world: World,
+        target: LivingEntity,
+        source: DamageSource,
+        consumers: List<Consumer<EnchantmentEffectsInSlotData>>
+    )
+
+    fun modifyArmorEffectiveness(
+        effectiveness: MutableFloat,
+        world: World,
+        target: Entity,
+        weapon: ItemStack,
+        source: DamageSource,
+        consumers: List<Consumer<EnchantmentEffectsData>>
+    )
+
     fun mutateInvulnerabilityToDamage(
         invulnerable: MutableBoolean,
         world: World,

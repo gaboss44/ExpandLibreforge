@@ -85,12 +85,13 @@ object EffectPlaySoundKey : Effect<NoCompileData>("play_sound_key") {
                 NumberUtils.evaluateExpression(expr, config.toPlaceholderContext(data)).toFloat()
             } ?: 1.0f
 
-        if (Prerequisite.HAS_1_20_3.isMet && config.has("seed")) {
+        // if (Prerequisite.HAS_1_20_3.isMet && config.has("seed")) {
+        if (config.has("seed")) {
             val seed = config.getDoubleFromExpression("seed", data).toLong()
             target.playSound(centerLocation, sound, category, volume.toFloat() * volumeMultiplier, pitch.toFloat(), seed)
+        } else {
+            target.playSound(centerLocation, sound, category, volume.toFloat() * volumeMultiplier, pitch.toFloat())
         }
-
-        else target.playSound(centerLocation, sound, category, volume.toFloat() * volumeMultiplier, pitch.toFloat())
 
         return true
     }

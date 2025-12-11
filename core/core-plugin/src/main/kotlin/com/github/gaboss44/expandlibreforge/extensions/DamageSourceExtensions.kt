@@ -1,4 +1,5 @@
 @file:Suppress("UnstableApiUsage")
+
 package com.github.gaboss44.expandlibreforge.extensions
 
 import com.github.gaboss44.expandlibreforge.proxies.DamageSourceAccessorProxy
@@ -15,6 +16,8 @@ object DamageSourceExtensions {
         }
     }
 }
+
+val DamageSource.weapon get() = damageSourceAccessor.getWeapon(this)
 
 fun DamageSource.toCritical() = damageSourceAccessor.toCritical(this)
 

@@ -1,10 +1,8 @@
 package com.github.gaboss44.expandlibreforge.proxy.v1_21_7
 
 import com.github.gaboss44.expandlibreforge.proxies.EntityAccessorProxy
-import com.github.gaboss44.expandlibreforge.proxy.common.asNMSCopy
 import com.github.gaboss44.expandlibreforge.proxy.common.toNMS
 import io.papermc.paper.event.entity.EntityKnockbackEvent
-import net.minecraft.core.component.DataComponents
 import net.minecraft.core.registries.BuiltInRegistries.SOUND_EVENT
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket
 import net.minecraft.network.protocol.game.ClientboundSoundPacket
@@ -17,6 +15,7 @@ import org.bukkit.World
 import org.bukkit.craftbukkit.event.CraftEventFactory
 import org.bukkit.craftbukkit.util.CraftVector
 import org.bukkit.damage.DamageSource
+import org.bukkit.entity.AbstractArrow
 import org.bukkit.entity.Entity
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
@@ -52,6 +51,18 @@ class EntityAccessor : EntityAccessorProxy {
 
     override fun getSweepDamageRatio(entity: LivingEntity): Double {
         return entity.toNMS().getAttributeValue(Attributes.SWEEPING_DAMAGE_RATIO)
+    }
+
+    override fun getArmor(entity: LivingEntity): Double {
+        return entity.toNMS().getAttributeValue(Attributes.ARMOR)
+    }
+
+    override fun getArmorToughness(entity: LivingEntity): Double {
+        return entity.toNMS().getAttributeValue(Attributes.ARMOR_TOUGHNESS)
+    }
+
+    override fun getWeapon(arrow: AbstractArrow): ItemStack? {
+        return arrow.toNMS().weaponItem?.asBukkitMirror()
     }
 
     override fun hurtOrSimulate(
@@ -121,7 +132,7 @@ class EntityAccessor : EntityAccessorProxy {
 
         val diff = finalVelocity.subtract(deltaMovement)
 
-        // Paper event
+        // Paper events
         val event = CraftEventFactory.callEntityKnockbackEvent(
             target.bukkitLivingEntity,
             attacker,
@@ -177,8 +188,8 @@ class EntityAccessor : EntityAccessorProxy {
         return lastHurtMob.bukkitEntity
     }
 
-    override fun setLastHurtMob(entity: LivingEntity, lastHurtMob: Entity) {
-        entity.toNMS().setLastHurtMob(lastHurtMob.toNMS())
+    override fun setLastHurtMob(entity: LivingEntity, lastHurtMob: Entity?) {
+        entity.toNMS().setLastHurtMob(lastHurtMob?.toNMS())
     }
 
     override fun getLastHurtMobTimestamp(entity: LivingEntity): Int {

@@ -1,8 +1,7 @@
 package com.github.gaboss44.expandlibreforge.triggers
 
 import com.destroystokyo.paper.event.entity.EntityKnockbackByEntityEvent
-import com.github.gaboss44.expandlibreforge.util.tryDamagerAsLivingEntity
-import com.github.gaboss44.expandlibreforge.util.tryDamagerAsProjectile
+import com.github.gaboss44.expandlibreforge.extensions.nonEmptyCurrentWeapon
 import com.willfp.libreforge.toDispatcher
 import com.willfp.libreforge.triggers.Trigger
 import com.willfp.libreforge.triggers.TriggerData
@@ -13,6 +12,7 @@ import io.lumine.mythic.bukkit.MythicBukkit
 import io.papermc.paper.event.entity.EntityKnockbackEvent
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
+import org.bukkit.entity.Projectile
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 
@@ -20,6 +20,7 @@ sealed class TriggerTakeKnockback(id: String) : Trigger(id) {
     override val parameters = setOf(
         TriggerParameter.PLAYER,
         TriggerParameter.VICTIM,
+        TriggerParameter.ITEM,
         TriggerParameter.PROJECTILE,
         TriggerParameter.EVENT,
         TriggerParameter.VALUE,
@@ -31,33 +32,32 @@ sealed class TriggerTakeKnockback(id: String) : Trigger(id) {
 
         val entity = event.entity
 
+        val byEntityEvent = event as? EntityKnockbackByEntityEvent
+
+        val attacker = byEntityEvent?.hitBy?.tryAsLivingEntity()
+
         if (Bukkit.getPluginManager().isPluginEnabled("MythicMobs")) {
-            if (event is EntityKnockbackByEntityEvent) {
-                val attacker = event.hitBy.tryAsLivingEntity()
-                if (MythicBukkit.inst().mobManager.isMythicMob(attacker)) {
-                    return
-                }
+            if (attacker != null && MythicBukkit.inst().mobManager.isMythicMob(attacker)) {
+                return
             }
         }
 
-        val byEntityEvent = event as? EntityKnockbackByEntityEvent
-
-        val victim = byEntityEvent?.tryDamagerAsLivingEntity()
-
-        val projectile = byEntityEvent?.tryDamagerAsProjectile()
+        val projectile = byEntityEvent?.hitBy as? Projectile
 
         val vector = event.knockback
         val length = vector.length()
+        val strength = byEntityEvent?.knockbackStrength
 
         this.dispatch(
             entity.toDispatcher(),
             TriggerData(
                 player = entity as? Player,
-                victim = victim,
+                victim = attacker,
+                item = attacker?.nonEmptyCurrentWeapon,
                 event = event,
                 projectile = projectile,
                 value = length,
-                altValue = if (event is EntityKnockbackByEntityEvent) event.knockbackStrength.toDouble() else length,
+                altValue = strength?.toDouble() ?: length,
                 velocity = vector
             )
         )

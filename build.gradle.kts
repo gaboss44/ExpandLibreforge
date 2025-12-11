@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     java
     `java-library`
+    `maven-publish`
     kotlin("jvm") version "2.1.21"
     id("com.gradleup.shadow") version "9.2.2" // "8.3.6"
     id("com.willfp.libreforge-gradle-plugin") version "1.0.3"
@@ -34,6 +35,7 @@ dependencies {
 
 allprojects {
     apply(plugin = "java")
+    apply(plugin = "maven-publish")
     apply(plugin = "kotlin")
     apply(plugin = "com.gradleup.shadow")
 
@@ -57,6 +59,11 @@ allprojects {
         compileOnly("io.lumine:Mythic:5.7.0")
         compileOnly("io.lumine:LumineUtils:1.19-SNAPSHOT")
         compileOnly("net.dmulloy2:ProtocolLib:5.4.0")
+
+        // https://mvnrepository.com/artifact/net.bytebuddy/byte-buddy
+        compileOnly("net.bytebuddy:byte-buddy:1.18.0")
+        // https://mvnrepository.com/artifact/net.bytebuddy/byte-buddy-agent
+        compileOnly("net.bytebuddy:byte-buddy-agent:1.18.0")
     }
 
     java {
@@ -67,7 +74,10 @@ allprojects {
     tasks {
 
         shadowJar {
-            relocate("com.willfp.libreforge.loader", "com.github.gaboss44.expandlibreforge.libreforge.loader")
+            relocate(
+                "com.willfp.libreforge.loader",
+                "com.github.gaboss44.expandlibreforge.libreforge.loader"
+            )
         }
 
         compileKotlin {
@@ -86,9 +96,9 @@ allprojects {
         processResources {
             filesMatching(listOf("**/plugin.yml", "**/eco.yml")) {
                 expand(
-                    "version" to project.version,
-                    "libreforgeVersion" to libreforgeVersion,
-                    "pluginName" to rootProject.name
+                    "pluginName" to rootProject.name,
+                    "pluginVersion" to project.version,
+                    "libreforgeVersion" to libreforgeVersion
                 )
             }
         }
@@ -96,5 +106,15 @@ allprojects {
         build {
             dependsOn(shadowJar)
         }
+    }
+}
+
+tasks.processResources {
+    val bootstrapJar = project(":bootstrap").tasks.jar
+
+    dependsOn(bootstrapJar)
+
+    from(bootstrapJar) {
+        into("bootstrap")
     }
 }

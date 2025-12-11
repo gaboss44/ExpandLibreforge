@@ -1,9 +1,7 @@
 package com.github.gaboss44.expandlibreforge.triggers
 
+import com.github.gaboss44.expandlibreforge.extensions.nonEmptyCurrentWeapon
 import com.github.gaboss44.expandlibreforge.features.multipliers.DamageMultipliers
-import com.github.gaboss44.expandlibreforge.util.tryDamagerAsLivingEntity
-import com.github.gaboss44.expandlibreforge.util.tryDamagerAsPlayer
-import com.github.gaboss44.expandlibreforge.util.tryDamagerAsProjectile
 import com.willfp.libreforge.toDispatcher
 import com.willfp.libreforge.triggers.Trigger
 import com.willfp.libreforge.triggers.TriggerData
@@ -12,15 +10,19 @@ import com.willfp.libreforge.triggers.Triggers
 import com.willfp.libreforge.triggers.tryAsLivingEntity
 import io.lumine.mythic.bukkit.MythicBukkit
 import org.bukkit.Bukkit
+import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
+import org.bukkit.entity.Projectile
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 
+@Suppress("UnstableApiUsage")
 sealed class TriggerInflictDamage(id: String) : Trigger(id) {
     override val parameters = setOf(
         TriggerParameter.PLAYER,
         TriggerParameter.VICTIM,
+        TriggerParameter.ITEM,
         TriggerParameter.PROJECTILE,
         TriggerParameter.EVENT,
         TriggerParameter.VALUE,
@@ -28,23 +30,32 @@ sealed class TriggerInflictDamage(id: String) : Trigger(id) {
     )
 
     fun handle(event: EntityDamageByEntityEvent) {
-        val player = event.tryDamagerAsLivingEntity() ?: return
+        val source = event.damageSource
+
+        val attacker =
+            event.damager.tryAsLivingEntity() ?:
+            source.causingEntity as? LivingEntity ?:
+            source.directEntity as? LivingEntity ?:
+            return
+
+        val victim = event.entity
 
         if (Bukkit.getPluginManager().isPluginEnabled("MythicMobs")) {
-            val victim = event.entity.tryAsLivingEntity()
             if (MythicBukkit.inst().mobManager.isMythicMob(victim)) {
                 return
             }
         }
 
-        val victim = event.entity.tryAsLivingEntity()
-        val projectile = event.tryDamagerAsProjectile()
+        val projectile =
+            event.damager as? Projectile ?:
+            source.directEntity as? Projectile
 
         this.dispatch(
-            player.toDispatcher(),
+            attacker.toDispatcher(),
             TriggerData(
-                player = player as? Player,
-                victim = victim,
+                player = attacker as? Player,
+                victim = victim as? LivingEntity,
+                item = attacker.nonEmptyCurrentWeapon,
                 event = event,
                 projectile = projectile,
                 value = event.finalDamage * DamageMultipliers.calculate(event),

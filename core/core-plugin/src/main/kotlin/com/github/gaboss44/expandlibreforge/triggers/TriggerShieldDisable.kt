@@ -1,14 +1,14 @@
 package com.github.gaboss44.expandlibreforge.triggers
 
-import com.github.gaboss44.expandlibreforge.util.tryDamagerAsLivingEntity
-import com.github.gaboss44.expandlibreforge.util.tryDamagerAsProjectile
+import com.github.gaboss44.expandlibreforge.extensions.nonEmptyCurrentWeapon
 import com.willfp.libreforge.toDispatcher
 import com.willfp.libreforge.triggers.Trigger
 import com.willfp.libreforge.triggers.TriggerData
 import com.willfp.libreforge.triggers.TriggerParameter
 import com.willfp.libreforge.triggers.Triggers
-import com.willfp.libreforge.updateEffects
+import com.willfp.libreforge.triggers.tryAsLivingEntity
 import io.papermc.paper.event.player.PlayerShieldDisableEvent
+import org.bukkit.entity.Projectile
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 
@@ -17,6 +17,7 @@ sealed class TriggerShieldDisable(id: String) : Trigger(id) {
         TriggerParameter.PLAYER,
         TriggerParameter.EVENT,
         TriggerParameter.VICTIM,
+        TriggerParameter.ITEM,
         TriggerParameter.PROJECTILE,
         TriggerParameter.VALUE
     )
@@ -24,15 +25,16 @@ sealed class TriggerShieldDisable(id: String) : Trigger(id) {
     fun handle(event: PlayerShieldDisableEvent) {
         val player = event.player
 
-        val victim = event.tryDamagerAsLivingEntity()
+        val victim = event.damager.tryAsLivingEntity()
 
-        val projectile = event.tryDamagerAsProjectile()
+        val projectile = event.damager as? Projectile
 
         this.dispatch(
             player.toDispatcher(),
             TriggerData(
                 player = player,
                 victim = victim,
+                item = victim?.nonEmptyCurrentWeapon,
                 projectile = projectile,
                 event = event,
                 value = event.cooldown.toDouble()

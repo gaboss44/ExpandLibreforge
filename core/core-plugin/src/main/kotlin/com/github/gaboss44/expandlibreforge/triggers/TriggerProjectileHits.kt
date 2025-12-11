@@ -1,10 +1,12 @@
 package com.github.gaboss44.expandlibreforge.triggers
 
+import com.github.gaboss44.expandlibreforge.extensions.firedFromWeapon
 import com.willfp.libreforge.toDispatcher
 import com.willfp.libreforge.triggers.Trigger
 import com.willfp.libreforge.triggers.TriggerData
 import com.willfp.libreforge.triggers.TriggerParameter
 import com.willfp.libreforge.triggers.Triggers
+import org.bukkit.entity.AbstractArrow
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -18,11 +20,13 @@ sealed class TriggerProjectileHits(id: String) : Trigger(id) {
         TriggerParameter.PROJECTILE,
         TriggerParameter.LOCATION,
         TriggerParameter.BLOCK,
+        TriggerParameter.ITEM,
         TriggerParameter.EVENT,
         TriggerParameter.VELOCITY
     )
 
     fun handle(event: ProjectileHitEvent) {
+        val weapon = (event.entity as? AbstractArrow)?.firedFromWeapon
         this.dispatch(
             event.entity.toDispatcher(),
             TriggerData(
@@ -31,6 +35,8 @@ sealed class TriggerProjectileHits(id: String) : Trigger(id) {
                 victim = event.hitEntity as? LivingEntity,
                 block = event.hitBlock,
                 projectile = event.entity,
+                item = weapon,
+                location = event.entity.location,
                 velocity = event.entity.velocity,
             )
         )

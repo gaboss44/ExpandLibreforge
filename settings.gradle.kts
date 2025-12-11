@@ -12,6 +12,8 @@ plugins {
 
 rootProject.name = "ExpandLibreforge"
 
+include("bootstrap")
+
 include("core")
 include("core:core-plugin")
 include("core:core-nms")

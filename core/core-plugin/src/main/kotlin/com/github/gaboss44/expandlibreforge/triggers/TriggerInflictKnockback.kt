@@ -1,8 +1,7 @@
 package com.github.gaboss44.expandlibreforge.triggers
 
 import com.destroystokyo.paper.event.entity.EntityKnockbackByEntityEvent
-import com.github.gaboss44.expandlibreforge.util.tryDamagerAsLivingEntity
-import com.github.gaboss44.expandlibreforge.util.tryDamagerAsProjectile
+import com.github.gaboss44.expandlibreforge.extensions.nonEmptyCurrentWeapon
 import com.willfp.libreforge.toDispatcher
 import com.willfp.libreforge.triggers.Trigger
 import com.willfp.libreforge.triggers.TriggerData
@@ -12,6 +11,7 @@ import com.willfp.libreforge.triggers.tryAsLivingEntity
 import io.lumine.mythic.bukkit.MythicBukkit
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
+import org.bukkit.entity.Projectile
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 
@@ -19,6 +19,7 @@ sealed class TriggerInflictKnockback(id: String) : Trigger(id) {
     override val parameters = setOf(
         TriggerParameter.PLAYER,
         TriggerParameter.VICTIM,
+        TriggerParameter.ITEM,
         TriggerParameter.PROJECTILE,
         TriggerParameter.EVENT,
         TriggerParameter.VALUE,
@@ -26,17 +27,16 @@ sealed class TriggerInflictKnockback(id: String) : Trigger(id) {
     )
 
     fun handle(event: EntityKnockbackByEntityEvent) {
-        val damager = event.tryDamagerAsLivingEntity() ?: return
+        val damager = event.hitBy.tryAsLivingEntity() ?: return
+        val victim = event.entity
 
         if (Bukkit.getPluginManager().isPluginEnabled("MythicMobs")) {
-            val victim = event.entity.tryAsLivingEntity()
             if (MythicBukkit.inst().mobManager.isMythicMob(victim)) {
                 return
             }
         }
 
-        val victim = event.entity.tryAsLivingEntity()
-        val projectile = event.tryDamagerAsProjectile()
+        val projectile = event.hitBy as? Projectile
         
         val vector = event.knockback
 
@@ -45,6 +45,7 @@ sealed class TriggerInflictKnockback(id: String) : Trigger(id) {
             TriggerData(
                 player = damager as? Player,
                 victim = victim,
+                item = damager.nonEmptyCurrentWeapon,
                 event = event,
                 projectile = projectile,
                 value = vector.length(),

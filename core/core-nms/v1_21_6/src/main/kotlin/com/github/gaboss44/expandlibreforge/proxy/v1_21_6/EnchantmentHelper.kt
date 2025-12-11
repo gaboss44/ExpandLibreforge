@@ -44,11 +44,11 @@ class EnchantmentHelper : EnchantmentHelperProxy {
 
         weapon.unwrapNMS().runIterationOnEnchantmentConditionalEffects(
             component = EnchantmentEffectComponents.DAMAGE,
-            context = { damageContext(world.toNMS(), it.overrideLevel.value, target.toNMS(), source.toNMS()) },
+            context = { damageContext(world.toNMS(), it.level.value, target.toNMS(), source.toNMS()) },
             consumers = consumers
         ) { data, _, effect ->
             damage.value = effect.effect().process(
-                data.overrideLevel.value,
+                data.level.value,
                 target.toNMS().getRandom(),
                 damage.value
             )
@@ -65,11 +65,11 @@ class EnchantmentHelper : EnchantmentHelperProxy {
     ) {
         weapon.unwrapNMS().runIterationOnEnchantmentConditionalEffects(
             component = EnchantmentEffectComponents.SMASH_DAMAGE_PER_FALLEN_BLOCK,
-            context = { damageContext(world.toNMS(), it.overrideLevel.value, target.toNMS(), source.toNMS()) },
+            context = { damageContext(world.toNMS(), it.level.value, target.toNMS(), source.toNMS()) },
             consumers = consumers
         ) { data, _, effect ->
             damage.value = effect.effect().process(
-                data.overrideLevel.value,
+                data.level.value,
                 target.toNMS().getRandom(),
                 damage.value
             )
@@ -86,13 +86,54 @@ class EnchantmentHelper : EnchantmentHelperProxy {
     ) {
         weapon.unwrapNMS().runIterationOnEnchantmentConditionalEffects(
             component = EnchantmentEffectComponents.KNOCKBACK,
-            context = { damageContext(world.toNMS(), it.overrideLevel.value, target.toNMS(), source.toNMS()) },
+            context = { damageContext(world.toNMS(), it.level.value, target.toNMS(), source.toNMS()) },
             consumers = consumers
         ) { data, _, effect ->
             knockback.value = effect.effect().process(
-                data.overrideLevel.value,
+                data.level.value,
                 target.toNMS().getRandom(),
                 knockback.value
+            )
+        }
+    }
+
+    override fun modifyDamageProtection(
+        protection: MutableFloat,
+        world: World,
+        target: LivingEntity,
+        source: DamageSource,
+        consumers: List<Consumer<EnchantmentEffectsInSlotData>>
+    ) {
+        target.toNMS().runIterationOnEnchantmentConditionalEffects(
+            component = EnchantmentEffectComponents.DAMAGE_PROTECTION,
+            context = { damageContext(world.toNMS(), it.level.value, target.toNMS(), source.toNMS()) },
+            consumers = consumers
+        ) { data, _, _, effect ->
+            protection.value = effect.effect.process(
+                data.level.value,
+                target.toNMS().getRandom(),
+                protection.value
+            )
+        }
+    }
+
+    override fun modifyArmorEffectiveness(
+        effectiveness: MutableFloat,
+        world: World,
+        target: Entity,
+        weapon: ItemStack,
+        source: DamageSource,
+        consumers: List<Consumer<EnchantmentEffectsData>>
+    ) {
+        weapon.unwrapNMS().runIterationOnEnchantmentConditionalEffects(
+            component = EnchantmentEffectComponents.ARMOR_EFFECTIVENESS,
+            context = { damageContext(world.toNMS(), it.level.value, target.toNMS(), source.toNMS()) },
+            consumers = consumers
+        ) { data, _, effect ->
+            effectiveness.value = effect.effect.process(
+                data.level.value,
+                target.toNMS().getRandom(),
+                effectiveness.value
             )
         }
     }
@@ -106,7 +147,7 @@ class EnchantmentHelper : EnchantmentHelperProxy {
     ) {
         entity.toNMS().runIterationOnEnchantmentConditionalEffects(
             component = EnchantmentEffectComponents.DAMAGE_IMMUNITY,
-            context = { damageContext(world.toNMS(), it.overrideLevel.value, entity.toNMS(), source.toNMS()) },
+            context = { damageContext(world.toNMS(), it.level.value, entity.toNMS(), source.toNMS()) },
             consumers = consumers
         ) { data, _, _, _ ->
             invulnerable.value = true
@@ -167,12 +208,12 @@ class EnchantmentHelper : EnchantmentHelperProxy {
         if (entity is net.minecraft.world.entity.LivingEntity) {
             entity.runIterationOnEnchantmentTargetedConditionalEffects(
                 component = EnchantmentEffectComponents.POST_ATTACK,
-                context = { damageContext(level, it.overrideLevel.value, entity, source) },
+                context = { damageContext(level, it.level.value, entity, source) },
                 consumers = bySlotConsumers
             ) { data, holder, slot, effect ->
                 effect.effect.apply(
                     level,
-                    data.overrideLevel.value,
+                    data.level.value,
                     EnchantedItemInUse(entity.getItemBySlot(slot), slot, entity),
                     entity,
                     entity.position()
@@ -196,7 +237,7 @@ class EnchantmentHelper : EnchantmentHelperProxy {
         if (attacker is net.minecraft.world.entity.LivingEntity) {
             weapon.runIterationOnEnchantmentTargetedConditionalEffects(
                 component = EnchantmentEffectComponents.POST_ATTACK,
-                context = { damageContext(level, it.overrideLevel.value, entity, source) },
+                context = { damageContext(level, it.level.value, entity, source) },
                 consumers = byWeaponConsumers
             ) { data, holder, effect ->
                 val affected = when (effect.affected) {
@@ -204,12 +245,12 @@ class EnchantmentHelper : EnchantmentHelperProxy {
                     EnchantmentTarget.DAMAGING_ENTITY -> source.directEntity
                     EnchantmentTarget.VICTIM -> entity
                 } ?: return@runIterationOnEnchantmentTargetedConditionalEffects
-                effect.effect.apply(level, data.overrideLevel.value, EnchantedItemInUse(weapon, EquipmentSlot.MAINHAND, attacker), affected, affected.position())
+                effect.effect.apply(level, data.level.value, EnchantedItemInUse(weapon, EquipmentSlot.MAINHAND, attacker), affected, affected.position())
             }
         } else if (onBreak != null) {
             weapon.runIterationOnEnchantmentTargetedConditionalEffects(
                 component = EnchantmentEffectComponents.POST_ATTACK,
-                context = { damageContext(level, it.overrideLevel.value, entity, source) },
+                context = { damageContext(level, it.level.value, entity, source) },
                 consumers = byWeaponConsumers
             ) { data, holder, effect ->
                 val affected = when (effect.affected) {
@@ -217,7 +258,7 @@ class EnchantmentHelper : EnchantmentHelperProxy {
                     EnchantmentTarget.DAMAGING_ENTITY -> source.directEntity
                     EnchantmentTarget.VICTIM -> entity
                 } ?: return@runIterationOnEnchantmentTargetedConditionalEffects
-                effect.effect.apply(level, data.overrideLevel.value, EnchantedItemInUse(weapon, null, null, onBreak), affected, affected.position())
+                effect.effect.apply(level, data.level.value, EnchantedItemInUse(weapon, null, null, onBreak), affected, affected.position())
             }
         }
     }

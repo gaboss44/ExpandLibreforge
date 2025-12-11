@@ -2,19 +2,19 @@
 
 package com.github.gaboss44.expandlibreforge.extensions
 
-import com.github.gaboss44.expandlibreforge.events.entity.EntityCriticalCheckEvent
+import com.github.gaboss44.expandlibreforge.events.entity.AttemptSmashAttackEvent
+import com.github.gaboss44.expandlibreforge.events.entity.EntityAttemptCriticalAttackEvent
 import com.github.gaboss44.expandlibreforge.events.entity.EntityEnchantmentDamageEffectsEvent
 import com.github.gaboss44.expandlibreforge.events.entity.EntityEnchantmentFallBasedDamageEffectsEvent
 import com.github.gaboss44.expandlibreforge.events.entity.EntityEnchantmentKnockbackEffectsEvent
 import com.github.gaboss44.expandlibreforge.events.entity.EntityEnchantmentPostAttackBySlotEffectsEvent
 import com.github.gaboss44.expandlibreforge.events.entity.EntityEnchantmentPostAttackByWeaponEffectsEvent
-import com.github.gaboss44.expandlibreforge.events.entity.EntitySmashCheckEvent
-import com.github.gaboss44.expandlibreforge.events.entity.EntitySmashFallDistanceEvent
+import com.github.gaboss44.expandlibreforge.events.entity.EntityAttemptSmashAttackEvent
+import com.github.gaboss44.expandlibreforge.events.entity.EntitySmashAttackPropertiesEvent
 import com.github.gaboss44.expandlibreforge.prerequisites.PrerequisiteHasSmashAttemptEvent
 import com.github.gaboss44.expandlibreforge.proxies.EntityAccessorProxy
 import com.github.gaboss44.expandlibreforge.util.getBoolOrElse
 import com.willfp.eco.core.Prerequisite
-import io.papermc.paper.event.entity.EntityAttemptSmashAttackEvent
 import io.papermc.paper.event.entity.EntityKnockbackEvent
 import org.apache.commons.lang3.mutable.MutableFloat
 import org.bukkit.GameMode
@@ -25,6 +25,7 @@ import org.bukkit.Tag
 import org.bukkit.World
 import org.bukkit.damage.DamageSource
 import org.bukkit.damage.DamageType
+import org.bukkit.entity.AbstractArrow
 import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.ComplexEntityPart
 import org.bukkit.entity.Entity
@@ -80,6 +81,12 @@ val LivingEntity.weapon get() = if (isRiptiding) {
     this.equipment?.itemInMainHand
 }
 
+val LivingEntity.currentWeapon get() = (this as? Player)?.currentPlayerAttackData?.weapon ?: this.weapon
+
+val LivingEntity.nonEmptyCurrentWeapon get() = this.currentWeapon?.takeUnless(ItemStack::isEmpty)
+
+val AbstractArrow.firedFromWeapon get() = entityAccessor.getWeapon(this)
+
 val LivingEntity.attackDamage get() = entityAccessor.getAttackDamage(this)
 
 val LivingEntity.speed get() = entityAccessor.getSpeed(this)
@@ -89,6 +96,10 @@ val LivingEntity.attackKnockback get() = entityAccessor.getAttackKnockback(this)
 val LivingEntity.knockbackResistance get() = entityAccessor.getKnockbackResistance(this)
 
 val LivingEntity.sweepDamageRatio get() = entityAccessor.getSweepDamageRatio(this)
+
+val LivingEntity.armor get() = entityAccessor.getArmor(this)
+
+val LivingEntity.armorToughness get() = entityAccessor.getArmorToughness(this)
 
 val LivingEntity.currentAttackDamage : Number get() = if (isRiptiding) {
     this.riptideDamage
@@ -198,7 +209,6 @@ var Entity.hurtMarked
 var LivingEntity.lastHurtMob
     get() = entityAccessor.getLastHurtMob(this)
     set(value) {
-        if (value == null) return
         entityAccessor.setLastHurtMob(this, value)
     }
 
@@ -238,11 +248,11 @@ fun LivingEntity.attemptSmashAttack(
 ) : Boolean {
     val canSmashAttack = canSmashAttack
     return if (PrerequisiteHasSmashAttemptEvent.isMet) {
-        val event = EntityAttemptSmashAttackEvent(this, target, weapon, canSmashAttack)
+        val event = AttemptSmashAttackEvent.createPaper(this, target, weapon, canSmashAttack)
         event.callEvent()
         event.result.getBoolOrElse(canSmashAttack)
     } else {
-        val event = EntitySmashCheckEvent(this, target, weapon, canSmashAttack)
+        val event = EntityAttemptSmashAttackEvent(this, target, weapon, canSmashAttack)
         event.callEvent()
         event.result.getBoolOrElse(canSmashAttack)
     }
@@ -303,21 +313,45 @@ fun getSmashAttackKnockbackPredicate(attacker: Entity, target: Entity) = Predica
     true
 }
 
-val LivingEntity.nullableActiveItem: ItemStack? get() =
-    if (this.activeItem.isEmpty) null else this.activeItem
+val LivingEntity.nullableActiveItem: ItemStack? get() = this.activeItem.takeUnless(ItemStack::isEmpty)
 
-private val performingAttacks = mutableSetOf<UUID>()
+private val currentAttackingPlayers = mutableSetOf<UUID>()
 
 var Player.isPerformingAttack
-    get() = this.uniqueId in performingAttacks
+    get() = this.uniqueId in currentAttackingPlayers
     private set(value) {
         if (value) {
-            performingAttacks.add(this.uniqueId)
+            currentAttackingPlayers.add(this.uniqueId)
         } else {
-            performingAttacks.remove(this.uniqueId)
+            currentAttackingPlayers.remove(this.uniqueId)
         }
     }
 
+class PlayerAttackData(
+    val player: Player,
+    val target: Entity,
+    val damage: Float,
+    val enchantedDamage: Float,
+    val weapon: ItemStack,
+    val slot: EquipmentSlot,
+    val source: DamageSource
+)
+
+private val currentPlayerAttacks = mutableMapOf<UUID, PlayerAttackData>()
+
+var Player.currentPlayerAttackData: PlayerAttackData?
+    get() = currentPlayerAttacks[this.uniqueId]
+    private set(value) {
+        if (value != null) {
+            currentPlayerAttacks[this.uniqueId] = value
+        } else {
+            currentPlayerAttacks.remove(this.uniqueId)
+        }
+    }
+
+fun getCurrentPlayerAttackData(playerId: UUID) = currentPlayerAttacks[playerId]
+
+@JvmOverloads
 fun Player.performAttackSafely(
     target: Entity,
     damage: Float? = null,
@@ -338,8 +372,9 @@ fun Player.performAttackSafely(
     Performs an attack from this player to the target entity.
     This method handles damage calculation, critical hits, knockback, and various attack effects.
     Major parts of the logic are copied from PaperMC's Player#attack method,
-    with modifications to allow for richer event handling and customization.
+    with modifications to allow for richer events handling and customization.
  */
+@JvmOverloads
 fun Player.performAttack(
     target: Entity,
     damage: Float? = null,
@@ -365,13 +400,18 @@ fun Player.performAttack(
 
     val smashAttack = source.damageType == DamageType.MACE_SMASH
 
-    val mutableEnchantedDamage = MutableFloat(damage)
-    EnchantmentHelpers.modifyDamage(mutableEnchantedDamage, this.world, target, weapon, source) {
-        EntityEnchantmentDamageEffectsEvent(
-            this, it, target, mutableEnchantedDamage, damage, weapon, source
-        ).callEvent()
+    var enchantedDamage = damage
+    MutableFloat(enchantedDamage).let { mutable ->
+        EnchantmentHelpers.modifyDamage(mutable, this.world, target, weapon, source) { data ->
+            val event = EntityEnchantmentDamageEffectsEvent(
+                this, data, target, mutable.value, damage, weapon, source
+            )
+            event.callEvent()
+            mutable.value = event.damage
+        }
+        enchantedDamage = mutable.value
     }
-    var enchantedDamage = mutableEnchantedDamage.value - damage
+    enchantedDamage -= damage
 
     val attackStrengthScale = this.attackCooldown
 
@@ -400,26 +440,31 @@ fun Player.performAttack(
      */
     var smashFallDistance = 0.0f
     if (smashAttack) {
-        val smashFallDistanceEvent = EntitySmashFallDistanceEvent(
-            attacker = this,
-            target = target,
-            weapon = weapon,
-            source = source,
-            fallDistance = fallDistance,
-            ranges = listOf(4 to 3, 2 to 8, 1 to Double.MAX_VALUE)
-        )
-        smashFallDistanceEvent.callEvent()
-        damage += smashFallDistanceEvent.finalFallBasedDamage
-        smashFallDistance = smashFallDistanceEvent.overrideFallDistance
-
-        val mutableFallBasedDamage = MutableFloat(0f)
-        EnchantmentHelpers.modifyFallBasedDamage(mutableFallBasedDamage, this.world, target, weapon, source) {
-            EntityEnchantmentFallBasedDamageEffectsEvent(
-                this, it, target, mutableFallBasedDamage, 0f, weapon, source
-            ).callEvent()
+        val fallBasedDamageSteps = mutableListOf(2.0f to 3.0f, 1.0f to 8.0f)
+        val smashFallDistanceEvent = EntitySmashAttackPropertiesEvent(
+            this, target, weapon, source, smashFallDistance, fallBasedDamageSteps
+        ) { fallDistance ->
+            var totalFallBasedDamage = 0.0f
+            for (pair in fallBasedDamageSteps) {
+                val (scale, limit) = pair
+                totalFallBasedDamage += fallDistance.coerceIn(0.0f, limit) * scale
+            }
+            totalFallBasedDamage
         }
+        smashFallDistanceEvent.callEvent()
+        smashFallDistance = smashFallDistanceEvent.fallDistance
+        damage += smashFallDistanceEvent.totalFallBasedDamage
 
-        damage += mutableFallBasedDamage.value * smashFallDistance
+        MutableFloat(0f).let { mutable ->
+            EnchantmentHelpers.modifyFallBasedDamage(mutable, this.world, target, weapon, source) { data ->
+                val event = EntityEnchantmentFallBasedDamageEffectsEvent(
+                    this, data, target, mutable.value, 0f, weapon, source
+                )
+                event.callEvent()
+                mutable.value = event.damage
+            }
+            damage += mutable.value * smashFallDistance
+        }
     }
 
     /*
@@ -428,19 +473,17 @@ fun Player.performAttack(
     val critsDisabled = this.world.arePlayerCritsDisabled
     val initialCriticalAttack = strongAttack && this.canCrit && target is LivingEntity && !critsDisabled
 
-    val mutableCriticalMultiplier = MutableFloat(1.5f)
-    val criticalCheckEvent = EntityCriticalCheckEvent(this, target, weapon, source, mutableCriticalMultiplier, critsDisabled, initialCriticalAttack)
-    criticalCheckEvent.callEvent()
-    val criticalAttack = criticalCheckEvent.result.getBoolOrElse(initialCriticalAttack)
+    var criticalMultiplier = 1.5f
+    val criticalEvent = EntityAttemptCriticalAttackEvent(this, target, weapon, source, criticalMultiplier, critsDisabled, initialCriticalAttack)
+    criticalEvent.callEvent()
+    criticalMultiplier = criticalEvent.criticalDamageMultiplier
+    val criticalAttack = criticalEvent.result.getBoolOrElse(initialCriticalAttack)
 
     // Apply critical hit modifications
     if (criticalAttack) {
         source = source.toCritical()
-        damage *= mutableCriticalMultiplier.value
+        damage *= criticalMultiplier
     }
-
-    // Total damage after all modifications
-    val damage2 = damage + enchantedDamage
 
     /*
         Sweep attack check
@@ -457,284 +500,334 @@ fun Player.performAttack(
     val targetVelocity = target.velocity
     val targetHealth = if (target is LivingEntity) target.health else 0.0
 
-    // Apply damage and return if not successful
-    if (!target.hurtOrSimulate(source, damage + enchantedDamage)) {
-        this.sendSoundEffect(this.x, this.y, this.z, Sound.ENTITY_PLAYER_ATTACK_NODAMAGE, SoundCategory.PLAYERS, 1.0f, 1.0f)
-        return
-    }
+    val currentPlayerAttack = PlayerAttackData(
+        player = this,
+        target = target,
+        damage = damage,
+        enchantedDamage = enchantedDamage,
+        weapon = weapon,
+        slot = slot,
+        source = source
+    )
 
-    /*
-        Knockback application
-     */
-    var knockback = this.attackKnockback.toFloat()
-    val mutableKnockback = MutableFloat(knockback)
-    EnchantmentHelpers.modifyKnockback(mutableKnockback, this.world, target, weapon, source) {
-        EntityEnchantmentKnockbackEffectsEvent(
-            this, it, target, mutableKnockback, knockback, weapon, source
-        ).callEvent()
-    }
-    knockback = mutableKnockback.value.coerceAtLeast(0.5f)
-    if (sprintAttack) knockback += 0.5f
-    if (knockback > 0.0f) {
-        if (target is LivingEntity) {
-            if (Prerequisite.HAS_PAPER.isMet) {
-                val targetKnockbackResistance = target.knockbackResistance.coerceAtLeast(0.0)
-                target.applyKnockbackWithoutResistance(
-                    knockback * 0.5 / (1.0 + targetKnockbackResistance),
-                    sin(this.yaw * (Math.PI / 180.0).toFloat()).toDouble(),
-                    -cos(this.yaw * (Math.PI / 180.0).toFloat()).toDouble(),
-                    this, EntityKnockbackEvent.Cause.ENTITY_ATTACK
-                )
-            } else {
-                target.applyKnockback(
-                    knockback * 0.5,
-                    sin(this.yaw * (Math.PI / 180.0).toFloat()).toDouble(),
-                    -cos(this.yaw * (Math.PI / 180.0).toFloat()).toDouble()
-                )
-            }
-        } else {
-            if (Prerequisite.HAS_PAPER.isMet) {
-                target.push(
-                    -sin(this.yaw * (Math.PI / 180.0).toFloat()).toDouble() * knockback * 0.5,
-                    0.1,
-                    cos(this.yaw * (Math.PI / 180.0).toFloat()).toDouble() * knockback * 0.5,
-                    this
-                )
-            } else {
-                target.push(
-                    -sin((this.yaw * (Math.PI / 180.0)).toFloat()).toDouble() * knockback * 0.5,
-                    0.1,
-                    cos(this.yaw * (Math.PI / 180.0).toFloat()).toDouble() * knockback * 0.5
-                )
-            }
+    this.currentPlayerAttackData = currentPlayerAttack
+
+    try {
+        // Apply damage and return if not successful
+        if (!target.hurtOrSimulate(source, damage + enchantedDamage)) {
+            this.sendSoundEffect(
+                this.x,
+                this.y,
+                this.z,
+                Sound.ENTITY_PLAYER_ATTACK_NODAMAGE,
+                SoundCategory.PLAYERS,
+                1.0f,
+                1.0f
+            )
+            return
         }
+
+        /*
+            Knockback application
+         */
+        var knockback = this.attackKnockback.toFloat()
+        MutableFloat(knockback).let { mutable ->
+            EnchantmentHelpers.modifyKnockback(mutable, this.world, target, weapon, source) { data ->
+                val event = EntityEnchantmentKnockbackEffectsEvent(
+                    this, data, target, mutable.value, knockback, weapon, source
+                )
+                event.callEvent()
+                mutable.value = event.knockback
+            }
+            knockback = mutable.value.coerceAtLeast(0.5f)
+        }
+        if (sprintAttack) knockback += 0.5f
+        if (knockback > 0.0f) {
+            if (target is LivingEntity) {
+                if (Prerequisite.HAS_PAPER.isMet) {
+                    val targetKnockbackResistance = target.knockbackResistance.coerceAtLeast(0.0)
+                    target.applyKnockbackWithoutResistance(
+                        knockback * 0.5 / (1.0 + targetKnockbackResistance),
+                        sin(this.yaw * (Math.PI / 180.0).toFloat()).toDouble(),
+                        -cos(this.yaw * (Math.PI / 180.0).toFloat()).toDouble(),
+                        this, EntityKnockbackEvent.Cause.ENTITY_ATTACK
+                    )
+                } else {
+                    target.applyKnockback(
+                        knockback * 0.5,
+                        sin(this.yaw * (Math.PI / 180.0).toFloat()).toDouble(),
+                        -cos(this.yaw * (Math.PI / 180.0).toFloat()).toDouble()
+                    )
+                }
+            } else {
+                if (Prerequisite.HAS_PAPER.isMet) {
+                    target.push(
+                        -sin(this.yaw * (Math.PI / 180.0).toFloat()).toDouble() * knockback * 0.5,
+                        0.1,
+                        cos(this.yaw * (Math.PI / 180.0).toFloat()).toDouble() * knockback * 0.5,
+                        this
+                    )
+                } else {
+                    target.push(
+                        -sin((this.yaw * (Math.PI / 180.0)).toFloat()).toDouble() * knockback * 0.5,
+                        0.1,
+                        cos(this.yaw * (Math.PI / 180.0).toFloat()).toDouble() * knockback * 0.5
+                    )
+                }
+            }
 
 //        this.velocity = this.velocity.apply {
 //            x *= 0.6
 //            z *= 0.6
 //        }
-        if (!this.world.isSprintInterruptionOnAttackDisabled) {
-            this.isSprinting = false
-        }
-    }
-
-    if (sweepAttack) {
-        val sweepDamage = 1.0f + this.sweepDamageRatio.toFloat() * damage
-        val sweepSource = source.toKnownCause(EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK)
-
-        for (entity in this.world.getNearbyEntities(target.boundingBox.expand(1.0, 0.25, 1.0))) {
-            entity as? LivingEntity ?: continue
-            if (entity == this) continue
-            if (entity == target) continue
-            if (this.isAlliedTo(entity)) continue
-            if (entity is ArmorStand && entity.isMarker) continue
-            if (entity.location.distanceSquared(target.location) >= 9.0) continue
-            val mutableEnchantedSweepDamage = MutableFloat(sweepDamage)
-            EnchantmentHelpers.modifyDamage(mutableEnchantedSweepDamage, this.world, entity, weapon, sweepSource) {
-                EntityEnchantmentDamageEffectsEvent(
-                    this, it, entity, mutableEnchantedSweepDamage, sweepDamage, weapon, sweepSource
-                ).callEvent()
+            if (!this.world.isSprintInterruptionOnAttackDisabled) {
+                this.isSprinting = false
             }
-            val enchantedSweepDamage = mutableEnchantedSweepDamage.value * attackStrengthScale
-            entity.lastDamageCancelled = false
-            if (!entity.hurtServer(this.world, sweepSource, enchantedSweepDamage) || entity.lastDamageCancelled) continue
-            if (Prerequisite.HAS_PAPER.isMet) {
-                val entityKnockbackResistance = entity.knockbackResistance.coerceAtLeast(0.0)
-                entity.applyKnockbackWithoutResistance(
-                    0.4 / (1.0 + entityKnockbackResistance),
-                    sin((this.yaw * (Math.PI / 180.0)).toFloat()).toDouble(),
-                    -cos((this.yaw * Math.PI / 180.0).toFloat()).toDouble(),
-                    this, EntityKnockbackEvent.Cause.SWEEP_ATTACK
-                )
-            } else {
-                entity.applyKnockback(
-                    0.4,
-                    sin((this.yaw * (Math.PI / 180.0)).toFloat()).toDouble(),
-                    -cos((this.yaw * Math.PI / 180.0).toFloat()).toDouble()
-                )
-            }
-
-            val postAttackByWeaponConsumer = Consumer { data: EnchantmentEffectsData ->
-                EntityEnchantmentPostAttackByWeaponEffectsEvent(
-                    this, data, target, weapon, source
-                ).callEvent()
-            }
-            val postAttackBySlotConsumer = Consumer { data: EnchantmentEffectsInSlotData ->
-                EntityEnchantmentPostAttackBySlotEffectsEvent(
-                    entity, data, this, source
-                ).callEvent()
-            }
-            EnchantmentHelpers.doPostAttackEffects(
-                this.world, entity, weapon, sweepSource,
-                listOf(postAttackByWeaponConsumer),
-                listOf(postAttackBySlotConsumer)
-            )
         }
 
-        this.sendSoundEffect(this.x, this.y, this.z, Sound.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS, 1.0f, 1.0f)
-        this.sendSweepAttackEffects()
-    }
+        if (sweepAttack) {
+            val sweepDamage = 1.0f + this.sweepDamageRatio.toFloat() * damage
+            val sweepSource = source.toKnownCause(EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK)
 
-    if (target is Player && target.hurtMarked) {
-        var cancelled = false
-        val velocity2 = target.velocity
-        val velocityEvent = PlayerVelocityEvent(target, velocity2)
-        velocityEvent.callEvent()
-
-        if (velocityEvent.isCancelled) {
-            cancelled = true
-        } else if (velocity2 != velocityEvent.velocity) {
-            target.velocity = velocityEvent.velocity
-        }
-
-        if (!cancelled) {
-            target.sendMotionPacket(target)
-            target.velocity = targetVelocity
-            target.hurtMarked = false
-        }
-    }
-
-    if (criticalAttack) {
-        this.sendSoundEffect(
-            this.x, this.y, this.z,
-            Sound.ENTITY_PLAYER_ATTACK_CRIT,
-            SoundCategory.PLAYERS,
-            1.0f, 1.0f
-        )
-        this.sendCriticalHitEffects(target)
-    }
-
-    if (!criticalAttack && !sweepAttack) {
-        if (strongAttack) {
-            this.sendSoundEffect(
-                this.x, this.y, this.z,
-                Sound.ENTITY_PLAYER_ATTACK_STRONG,
-                SoundCategory.PLAYERS,
-                1.0f, 1.0f
-            )
-        } else {
-            this.sendSoundEffect(
-                this.x, this.y, this.z,
-                Sound.ENTITY_PLAYER_ATTACK_WEAK,
-                SoundCategory.PLAYERS,
-                1.0f, 1.0f
-            )
-        }
-    }
-
-    if (enchantedDamage > 0.0f) {
-        this.sendMagicalHitEffects(target)
-    }
-
-    this.lastHurtMob = target
-
-    val parentTarget = if (target is ComplexEntityPart) target.parent else target
-
-    var didHurt = false
-    val isWeapon = weapon.isWeapon
-
-    if (parentTarget is LivingEntity) {
-        if (isWeapon) {
-            weapon.awardUsage(this)
-            didHurt = true
-        }
-
-        if (smashAttack) {
-            this.velocity = this.velocity.apply { y = 0.01 }
-            this.currentImpulseImpactPosition = this.calculateImpactPosition()
-            this.ignoresFallDamageFromCurrentImpulse = true
-            this.sendMotionPacket(this)
-
-
-            val onGround = parentTarget.isOnGround
-            val sound = when {
-                onGround && smashFallDistance > 5.0f ->
-                    Sound.ITEM_MACE_SMASH_GROUND_HEAVY
-                onGround ->
-                    Sound.ITEM_MACE_SMASH_GROUND
-                else ->
-                    Sound.ITEM_MACE_SMASH_AIR
-            }
-            if (onGround) {
-                this.setSpawnExtraParticlesOnFall(true)
-            }
-
-            this.sendSoundEffect(this.x, this.y, this.z, sound, SoundCategory.PLAYERS, 1.0f, 1.0f)
-
-            val nearby = this.world.getNearbyEntities(parentTarget.boundingBox.expand(3.5), getSmashAttackKnockbackPredicate(this, parentTarget))
-            for (entity in nearby) {
+            for (entity in this.world.getNearbyEntities(target.boundingBox.expand(1.0, 0.25, 1.0))) {
                 entity as? LivingEntity ?: continue
-                val vec3 = entity.location.toVector().subtract(parentTarget.location.toVector())
-                val f1 = (3.5 - vec3.length()) * 0.7f
-                val f2 = if (smashFallDistance > 5.0f) 2.0f else 1.0f
-                val f3 = 1 - entity.knockbackResistance
-                if (f1 <= 0.0f || f3 <= 0.0f) continue
-                val vec31 = vec3.normalize().multiply(f1 * f2 * f3)
+                if (entity == this) continue
+                if (entity == target) continue
+                if (this.isAlliedTo(entity)) continue
+                if (entity is ArmorStand && entity.isMarker) continue
+                if (entity.location.distanceSquared(target.location) >= 9.0) continue
+                var enchantedSweepDamage = sweepDamage
+                MutableFloat(enchantedSweepDamage).let { mutable ->
+                    EnchantmentHelpers.modifyDamage(mutable, this.world, entity, weapon, sweepSource) { data ->
+                        val event = EntityEnchantmentDamageEffectsEvent(
+                            this, data, entity, mutable.value, sweepDamage, weapon, sweepSource
+                        )
+                        event.callEvent()
+                        mutable.value = event.damage
+                    }
+                    enchantedSweepDamage = mutable.value * attackStrengthScale
+                }
+                entity.lastDamageCancelled = false
+                if (!entity.hurtServer(
+                        this.world,
+                        sweepSource,
+                        enchantedSweepDamage
+                    ) || entity.lastDamageCancelled
+                ) continue
                 if (Prerequisite.HAS_PAPER.isMet) {
-                    entity.push(
-                        vec31.x,
-                        0.7,
-                        vec31.z,
-                        this
+                    val entityKnockbackResistance = entity.knockbackResistance.coerceAtLeast(0.0)
+                    entity.applyKnockbackWithoutResistance(
+                        0.4 / (1.0 + entityKnockbackResistance),
+                        sin((this.yaw * (Math.PI / 180.0)).toFloat()).toDouble(),
+                        -cos((this.yaw * Math.PI / 180.0).toFloat()).toDouble(),
+                        this, EntityKnockbackEvent.Cause.SWEEP_ATTACK
                     )
                 } else {
-                    entity.push(
-                        vec31.x,
-                        0.7,
-                        vec31.z
+                    entity.applyKnockback(
+                        0.4,
+                        sin((this.yaw * (Math.PI / 180.0)).toFloat()).toDouble(),
+                        -cos((this.yaw * Math.PI / 180.0).toFloat()).toDouble()
                     )
                 }
 
-                if (entity is Player) {
-                    entity.sendMotionPacket(entity)
+                val postAttackByWeaponConsumer = Consumer { data: EnchantmentEffectsData ->
+                    EntityEnchantmentPostAttackByWeaponEffectsEvent(
+                        this, data, target, weapon, source
+                    ).callEvent()
+                }
+                val postAttackBySlotConsumer = Consumer { data: EnchantmentEffectsInSlotData ->
+                    EntityEnchantmentPostAttackBySlotEffectsEvent(
+                        entity, data, this, source
+                    ).callEvent()
+                }
+                EnchantmentHelpers.doPostAttackEffects(
+                    this.world, entity, weapon, sweepSource,
+                    listOf(postAttackByWeaponConsumer),
+                    listOf(postAttackBySlotConsumer)
+                )
+            }
+
+            this.sendSoundEffect(
+                this.x,
+                this.y,
+                this.z,
+                Sound.ENTITY_PLAYER_ATTACK_SWEEP,
+                SoundCategory.PLAYERS,
+                1.0f,
+                1.0f
+            )
+            this.sendSweepAttackEffects()
+        }
+
+        if (target is Player && target.hurtMarked) {
+            var cancelled = false
+            val velocity2 = target.velocity
+            val velocityEvent = PlayerVelocityEvent(target, velocity2)
+            velocityEvent.callEvent()
+
+            if (velocityEvent.isCancelled) {
+                cancelled = true
+            } else if (velocity2 != velocityEvent.velocity) {
+                target.velocity = velocityEvent.velocity
+            }
+
+            if (!cancelled) {
+                target.sendMotionPacket(target)
+                target.velocity = targetVelocity
+                target.hurtMarked = false
+            }
+        }
+
+        if (criticalAttack) {
+            this.sendSoundEffect(
+                this.x, this.y, this.z,
+                Sound.ENTITY_PLAYER_ATTACK_CRIT,
+                SoundCategory.PLAYERS,
+                1.0f, 1.0f
+            )
+            this.sendCriticalHitEffects(target)
+        }
+
+        if (!criticalAttack && !sweepAttack) {
+            if (strongAttack) {
+                this.sendSoundEffect(
+                    this.x, this.y, this.z,
+                    Sound.ENTITY_PLAYER_ATTACK_STRONG,
+                    SoundCategory.PLAYERS,
+                    1.0f, 1.0f
+                )
+            } else {
+                this.sendSoundEffect(
+                    this.x, this.y, this.z,
+                    Sound.ENTITY_PLAYER_ATTACK_WEAK,
+                    SoundCategory.PLAYERS,
+                    1.0f, 1.0f
+                )
+            }
+        }
+
+        if (enchantedDamage > 0.0f) {
+            this.sendMagicalHitEffects(target)
+        }
+
+        this.lastHurtMob = target
+
+        val parentTarget = if (target is ComplexEntityPart) target.parent else target
+
+        var didHurt = false
+        val isWeapon = weapon.isWeapon
+
+        if (parentTarget is LivingEntity) {
+            if (isWeapon) {
+                weapon.awardUsage(this)
+                didHurt = true
+            }
+
+            if (smashAttack) {
+                this.velocity = this.velocity.apply { y = 0.01 }
+                this.currentImpulseImpactPosition = this.calculateImpactPosition()
+                this.ignoresFallDamageFromCurrentImpulse = true
+                this.sendMotionPacket(this)
+
+
+                val onGround = parentTarget.isOnGround
+                val sound = when {
+                    onGround && smashFallDistance > 5.0f ->
+                        Sound.ITEM_MACE_SMASH_GROUND_HEAVY
+
+                    onGround ->
+                        Sound.ITEM_MACE_SMASH_GROUND
+
+                    else ->
+                        Sound.ITEM_MACE_SMASH_AIR
+                }
+                if (onGround) {
+                    this.setSpawnExtraParticlesOnFall(true)
+                }
+
+                this.sendSoundEffect(this.x, this.y, this.z, sound, SoundCategory.PLAYERS, 1.0f, 1.0f)
+
+                val nearby = this.world.getNearbyEntities(
+                    parentTarget.boundingBox.expand(3.5),
+                    getSmashAttackKnockbackPredicate(this, parentTarget)
+                )
+                for (entity in nearby) {
+                    entity as? LivingEntity ?: continue
+                    val vec3 = entity.location.toVector().subtract(parentTarget.location.toVector())
+                    val f1 = (3.5 - vec3.length()) * 0.7f
+                    val f2 = if (smashFallDistance > 5.0f) 2.0f else 1.0f
+                    val f3 = 1 - entity.knockbackResistance
+                    if (f1 <= 0.0f || f3 <= 0.0f) continue
+                    val vec31 = vec3.normalize().multiply(f1 * f2 * f3)
+                    if (Prerequisite.HAS_PAPER.isMet) {
+                        entity.push(
+                            vec31.x,
+                            0.7,
+                            vec31.z,
+                            this
+                        )
+                    } else {
+                        entity.push(
+                            vec31.x,
+                            0.7,
+                            vec31.z
+                        )
+                    }
+
+                    if (entity is Player) {
+                        entity.sendMotionPacket(entity)
+                    }
                 }
             }
         }
-    }
 
-    /*
-        Post-attack enchantment effects
-     */
+        /*
+            Post-attack enchantment effects
+         */
 
-    val postAttackByWeaponEffectsConsumer = Consumer { data: EnchantmentEffectsData ->
-        EntityEnchantmentPostAttackByWeaponEffectsEvent(
-            this, data, target, weapon, source
-        ).callEvent()
-    }
-    val postAttackBySlotEffectsConsumer = Consumer { data: EnchantmentEffectsInSlotData ->
-        if (target !is LivingEntity) return@Consumer
-        EntityEnchantmentPostAttackBySlotEffectsEvent(
-            target, data, this, source
-        ).callEvent()
-    }
-
-    EnchantmentHelpers.doPostAttackEffects(
-        this.world, target, weapon, source,
-        listOf(postAttackByWeaponEffectsConsumer),
-        listOf(postAttackBySlotEffectsConsumer)
-    )
-
-    if (smashAttack) {
-        this.fallDistance = 0f
-    }
-
-    if (!weapon.isEmpty && parentTarget is LivingEntity) {
-        if (didHurt) {
-            weapon.hurtAndBreak(weapon.itemDamagePerAttack, this, slot)
+        val postAttackByWeaponEffectsConsumer = Consumer { data: EnchantmentEffectsData ->
+            EntityEnchantmentPostAttackByWeaponEffectsEvent(
+                this, data, target, weapon, source
+            ).callEvent()
         }
-        if (weapon.isEmpty && weapon == this.inventory.getItem(slot)) {
-            this.inventory.setItem(slot, ItemStack.empty())
+        val postAttackBySlotEffectsConsumer = Consumer { data: EnchantmentEffectsInSlotData ->
+            if (target !is LivingEntity) return@Consumer
+            EntityEnchantmentPostAttackBySlotEffectsEvent(
+                target, data, this, source
+            ).callEvent()
         }
-    }
 
-    if (target is LivingEntity) {
-        val dealt = targetHealth - target.health
-        this.awardDamageDealt((dealt * 10.0f).roundToInt())
+        EnchantmentHelpers.doPostAttackEffects(
+            this.world, target, weapon, source,
+            listOf(postAttackByWeaponEffectsConsumer),
+            listOf(postAttackBySlotEffectsConsumer)
+        )
 
-        if (dealt > 2.0) {
-            this.world.sendSimpleDamageIndicatorParticles(target, (dealt * 0.5).roundToInt())
+        if (smashAttack) {
+            this.fallDistance = 0f
         }
-    }
 
-    this.causeFoodExhaustion(this.world.combatExhaustion, EntityExhaustionEvent.ExhaustionReason.ATTACK)
+        if (!weapon.isEmpty && parentTarget is LivingEntity) {
+            if (didHurt) {
+                weapon.hurtAndBreak(weapon.itemDamagePerAttack, this, slot)
+            }
+            if (weapon.isEmpty && weapon == this.inventory.getItem(slot)) {
+                this.inventory.setItem(slot, ItemStack.empty())
+            }
+        }
+
+        if (target is LivingEntity) {
+            val dealt = targetHealth - target.health
+            this.awardDamageDealt((dealt * 10.0f).roundToInt())
+
+            if (dealt > 2.0) {
+                this.world.sendSimpleDamageIndicatorParticles(target, (dealt * 0.5).roundToInt())
+            }
+        }
+
+        this.causeFoodExhaustion(this.world.combatExhaustion, EntityExhaustionEvent.ExhaustionReason.ATTACK)
+
+    } finally {
+        this.currentPlayerAttackData = null
+    }
 }

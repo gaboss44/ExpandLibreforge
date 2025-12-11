@@ -1,6 +1,6 @@
 package com.github.gaboss44.expandlibreforge.events.shield
 
-import com.github.gaboss44.expandlibreforge.events.Parental
+import com.github.gaboss44.expandlibreforge.events.ParentalEvent
 import org.bukkit.entity.Player
 import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
@@ -10,7 +10,7 @@ class PlayerToggleShieldEvent(
     override val parent: Event?,
     player: Player,
     private val nowBlocking: Boolean
-) : PlayerEvent(player), Parental {
+) : PlayerEvent(player), ParentalEvent {
 
     fun isNowBlocking() = nowBlocking
 

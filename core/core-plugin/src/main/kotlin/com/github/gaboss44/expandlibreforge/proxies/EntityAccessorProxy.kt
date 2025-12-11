@@ -5,6 +5,7 @@ import org.bukkit.Sound
 import org.bukkit.SoundCategory
 import org.bukkit.World
 import org.bukkit.damage.DamageSource
+import org.bukkit.entity.AbstractArrow
 import org.bukkit.entity.Entity
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
@@ -25,6 +26,12 @@ interface EntityAccessorProxy {
     fun getKnockbackResistance(entity: LivingEntity): Double
 
     fun getSweepDamageRatio(entity: LivingEntity): Double
+
+    fun getArmor(entity: LivingEntity): Double
+
+    fun getArmorToughness(entity: LivingEntity): Double
+
+    fun getWeapon(arrow: AbstractArrow): ItemStack?
 
     fun hurtOrSimulate(
         target: Entity,
@@ -89,7 +96,7 @@ interface EntityAccessorProxy {
 
     fun getLastHurtMob(entity: LivingEntity): Entity?
 
-    fun setLastHurtMob(entity: LivingEntity, lastHurtMob: Entity)
+    fun setLastHurtMob(entity: LivingEntity, lastHurtMob: Entity?)
 
     fun getLastHurtMobTimestamp(entity: LivingEntity): Int
 

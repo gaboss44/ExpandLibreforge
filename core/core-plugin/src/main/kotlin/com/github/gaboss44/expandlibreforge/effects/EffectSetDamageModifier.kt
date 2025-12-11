@@ -1,6 +1,7 @@
 package com.github.gaboss44.expandlibreforge.effects
 
-import com.github.gaboss44.expandlibreforge.util.DamageUtils
+import com.github.gaboss44.expandlibreforge.extensions.getDamageModifierFunctions
+import com.github.gaboss44.expandlibreforge.extensions.recalculateDamageModifiers
 import com.github.gaboss44.expandlibreforge.util.getDamageModifierEnum
 import com.willfp.eco.core.config.interfaces.Config
 import com.willfp.eco.util.NumberUtils
@@ -29,7 +30,7 @@ object EffectSetDamageModifier : Effect<NoCompileData>("set_damage_modifier") {
         if (!event.isApplicable(type) || type == EntityDamageEvent.DamageModifier.BASE) return false
         val expression = config.getString("value")
         val context = config.toPlaceholderContext(data)
-        DamageUtils.getModifierFunctions(event)?.let { modifierFunctions ->
+        event.getDamageModifierFunctions()?.let { modifierFunctions ->
             val modifierFunction = modifierFunctions[type]!!
             modifierFunctions.put(type) { input: Double ->
                 val output = modifierFunction.apply(input)
@@ -48,7 +49,7 @@ object EffectSetDamageModifier : Effect<NoCompileData>("set_damage_modifier") {
                 expression = expression.replace("%m%", modifierStr)
                 NumberUtils.evaluateExpression(expression, context)
             }
-            DamageUtils.recalculateModifiers(event, modifierFunctions)
+            event.recalculateDamageModifiers(modifierFunctions)
         }
         return true
     }

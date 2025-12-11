@@ -38,9 +38,9 @@ object PaperIntegration : LoadableIntegration {
 
         TriggerLocalMove.registerAllInto(Triggers)
 
-        TriggerPreAttack.registerAllInto(Triggers)
+        TriggerPrePlayerAttack.registerAllInto(Triggers)
 
-        if (ClassUtils.exists("io.papermc.paper.event.entity.EntityKnockbackEvent")) {
+        if (ClassUtils.exists("io.papermc.paper.events.entity.EntityKnockbackEvent")) {
             TriggerTakeKnockback.registerAllInto(Triggers)
             TriggerInflictKnockback.registerAllInto(Triggers)
 
@@ -69,15 +69,15 @@ object PaperIntegration : LoadableIntegration {
         FilterPlayerCurrentCooldownPeriod.registerAllInto(Filters)
         FilterVictimCurrentCooldownPeriod.registerAllInto(Filters)
 
-        if (ClassUtils.exists("io.papermc.paper.event.entity.EntityAttemptSmashAttackEvent")) {
-            TriggerSmashAttempt.registerAllInto(Triggers)
+        Effects.register(EffectSetSmashAttackAttemptResult)
+        Effects.register(EffectSetCriticalAttackAttemptResult)
 
-            Effects.register(EffectSetSmashAttemptResult)
-
-            Filters.register(FilterSmashAttemptIsOriginallySuccessful)
-            Filters.register(FilterMatchSmashAttemptResultIfPresent)
-            Filters.register(FilterIgnoreSmashAttemptResultIfPresent)
-        }
+        Filters.register(FilterSmashAttackAttemptIsOriginallySuccessful)
+        Filters.register(FilterCriticalAttackAttemptIsOriginallySuccessful)
+        Filters.register(FilterMatchSmashAttackAttemptResultIfPresent)
+        Filters.register(FilterMatchCriticalAttackAttemptResultIfPresent)
+        Filters.register(FilterIgnoreSmashAttackAttemptResultIfPresent)
+        Filters.register(FilterIgnoreCriticalAttackAttemptResultIfPresent)
     }
 
     override fun getPluginName() = "Paper"
